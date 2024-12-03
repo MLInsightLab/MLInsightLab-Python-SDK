@@ -94,7 +94,7 @@ class MLILClient:
 
             # Check for environment variables indicating that the user is logging in from Jupyter
             url = os.getenv('API_URL')
-            confirmation = 'n'
+            confirmation = ''
             if url is not None:
                 while confirmation not in ['y', 'n']:
                     confirmation = input('It appears you are using this client from within the platform. Is that true? [y]/n? ').lower()
