@@ -7,10 +7,10 @@ setup(
     package_dir={"": "src"},
     install_requires=open("requirements.txt").read().splitlines(),
     author="MLIL Team",
-    description="Your Open Source Serverless Data Science Platform",
+    description="Your Open Source Data Science and MLOps Platform",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
-    url="https://github.com/jacobrenn/MLInsightLab/tree/main/mlinsightlab",
+    url="https://github.com/MLInsightLab/MLInsightLab-Python-SDK",
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: Apache Software License",
