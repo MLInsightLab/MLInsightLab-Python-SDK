@@ -97,11 +97,13 @@ class MLILClient:
             if url is not None:
                 confirmation = ''
                 while confirmation not in ['y', 'n']:
-                    confirmation = input('It appears you are using this client from within the platform. Is that true? [y]/n').lower()
+                    confirmation = input('It appears you are using this client from within the platform. Is that true? [y]/n? ').lower()
                     if confirmation == '':
                         confirmation = 'y'
             if confirmation == 'n':
                 url = input("Enter platform URL: ")
+                if not url.endswith('api'):
+                    url += '/api'
             username = input("Enter username: ")
             password = getpass.getpass("Enter password: ")
             api_key = getpass.getpass(
