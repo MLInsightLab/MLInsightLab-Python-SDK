@@ -92,7 +92,16 @@ class MLILClient:
                 print('Using stored credentials')
                 # return self._load_stored_credentials()
 
-            url = input("Enter platform URL: ")
+            # Check for environment variables indicating that the user is logging in from Jupyter
+            url = os.getenv('API_URL')
+            if url is not None:
+                confirmation = ''
+                while confirmation not in ['y', 'n']:
+                    confirmation = input('It appears you are using this client from within the platform. Is that true? [y]/n').lower()
+                    if confirmation == '':
+                        confirmation = 'y'
+            if confirmation == 'n':
+                url = input("Enter platform URL: ")
             username = input("Enter username: ")
             password = getpass.getpass("Enter password: ")
             api_key = getpass.getpass(
