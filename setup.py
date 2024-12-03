@@ -2,13 +2,10 @@ from setuptools import setup, find_packages
 
 setup(
     name="mlinsightlab",
-    version="0.0.3",
+    version="0.0.4",
     packages=find_packages(where="src"),
     package_dir={"": "src"},
-    install_requires=[
-        "requests>=2.25.0",
-        "pandas"
-    ],
+    install_requires=open("requirements.txt").read().splitlines(),
     author="MLIL Team",
     description="Your Open Source Serverless Data Science Platform",
     long_description=open("README.md").read(),
