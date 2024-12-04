@@ -84,9 +84,8 @@ class MLILClient:
 
         Not meant to be called by the user directly.
         """
-        if use_cached_credentials:
-            if self.config_path.exists():  # TODO implement credential update
-                return self._load_stored_credentials()
+        if use_cached_credentials and self.config_path.exists():
+            return self._load_stored_credentials()
         else:
 
             # Check for environment variables indicating that the user is logging in from Jupyter
@@ -94,10 +93,10 @@ class MLILClient:
             confirmation = ''
             if url is not None:
                 while confirmation not in ['y', 'n']:
-                    confirmation = input('It appears you are using this client from within the platform. Is that true? [y]/n? ').lower()
+                    confirmation = input('It appears you are using this client from within the platform. Is that true? [y]/n ').lower()
                     if confirmation == '':
                         confirmation = 'y'
-            if confirmation == 'n':
+            if confirmation in ['', 'n']:
                 url = input("Enter platform URL: ")
                 if not url.endswith('api'):
                     url += '/api'
@@ -108,7 +107,7 @@ class MLILClient:
 
             if not api_key:
                 generate_new = input(
-                    "Generate new API key? (y/n): ").lower() == 'y'
+                    "Generate new API key? [y]/n ").lower() in ['', 'y']
                 if generate_new:
                     api_key = self.issue_api_key(
                         username=username, password=password, url=url).json()
