@@ -89,7 +89,18 @@ class MLILClient:
                 return self._load_stored_credentials()
         else:
 
-            url = input("Enter platform URL: ")
+            # Check for environment variables indicating that the user is logging in from Jupyter
+            url = os.getenv('API_URL')
+            confirmation = ''
+            if url is not None:
+                while confirmation not in ['y', 'n']:
+                    confirmation = input('It appears you are using this client from within the platform. Is that true? [y]/n? ').lower()
+                    if confirmation == '':
+                        confirmation = 'y'
+            if confirmation == 'n':
+                url = input("Enter platform URL: ")
+                if not url.endswith('api'):
+                    url += '/api'
             username = input("Enter username: ")
             password = getpass.getpass("Enter password: ")
             api_key = getpass.getpass(
@@ -196,7 +207,7 @@ class MLILClient:
                 print(f'user {username} is now on the platform! Go say hi!')
             else:
                 print(
-                    f'Something went wrong, request returned a satus code {resp.status_code}')
+                    f'Something went wrong, request returned a status code {resp.status_code}')
 
         return resp.json()
 
@@ -281,7 +292,7 @@ class MLILClient:
                     f'Your password "{password}" is verified. Congratulations!')
             else:
                 print(
-                    f'Something went wrong, request returned a satus code {resp.status_code}')
+                    f'Something went wrong, request returned a status code {resp.status_code}')
 
         return resp
 
@@ -346,7 +357,7 @@ class MLILClient:
                     f'Your new password "{new_password}" is created. Try not to lose this one!')
             else:
                 print(
-                    f'Something went wrong, request returned a satus code {resp.status_code}')
+                    f'Something went wrong, request returned a status code {resp.status_code}')
 
         return resp.json()
 
@@ -386,7 +397,7 @@ class MLILClient:
                     f'User {username} works here, and they sound pretty important.')
             else:
                 print(
-                    f'Something went wrong, request returned a satus code {resp.status_code}')
+                    f'Something went wrong, request returned a status code {resp.status_code}')
 
         return resp.json()
 
@@ -429,7 +440,7 @@ class MLILClient:
                 print(f'User {username} now has the role {new_role}.')
             else:
                 print(
-                    f'Something went wrong, request returned a satus code {resp.status_code}')
+                    f'Something went wrong, request returned a status code {resp.status_code}')
 
         return resp.json()
 
@@ -465,7 +476,7 @@ class MLILClient:
                 print(f'Gaze upon your co-workers in wonder!')
             else:
                 print(
-                    f'Something went wrong, request returned a satus code {resp.status_code}')
+                    f'Something went wrong, request returned a status code {resp.status_code}')
 
         return resp.json()
 
@@ -512,7 +523,6 @@ class MLILClient:
         if overwrite_api_key:
             auth = {'username': username, 'key': self.api_key,
                     'url': url, 'password': password}
-            print(auth)
             self._save_credentials(auth)
 
         if verbose:
@@ -520,7 +530,7 @@ class MLILClient:
                 print(f'New key granted. Please only use this power for good.')
             else:
                 print(
-                    f'Something went wrong, request returned a satus code {resp.status_code}')
+                    f'Something went wrong, request returned a status code {resp.status_code}')
         return resp
 
     """
@@ -599,7 +609,7 @@ class MLILClient:
                     f'{model_name} is loading. This may take a few minutes, so go grab a doughnut. Mmmmmmm…doughnuts…')
             else:
                 print(
-                    f'Something went wrong, request returned a satus code {resp.status_code}')
+                    f'Something went wrong, request returned a status code {resp.status_code}')
 
         return resp
 
@@ -636,7 +646,7 @@ class MLILClient:
                 print(f'These are your models, Simba, as far as the eye can see.')
             else:
                 print(
-                    f'Something went wrong, request returned a satus code {resp.status_code}')
+                    f'Something went wrong, request returned a status code {resp.status_code}')
 
         return resp.json()
 
@@ -692,7 +702,7 @@ class MLILClient:
                 print(f'{model_name} has been unloaded from memory.')
             else:
                 print(
-                    f'Something went wrong, request returned a satus code {resp.status_code}')
+                    f'Something went wrong, request returned a status code {resp.status_code}')
 
         return resp.json()
 
@@ -767,7 +777,7 @@ class MLILClient:
                 print(f'Sometimes I think I think')
             else:
                 print(
-                    f'Something went wrong, request returned a satus code {resp.status_code}')
+                    f'Something went wrong, request returned a status code {resp.status_code}')
 
         return resp.json()
     """
@@ -776,7 +786,7 @@ class MLILClient:
     ###########################################################################
     """
 
-    def reset_platform(
+    def reset_deployment_server(
         self,
         failsafe: bool = True,
         url: str = None,
@@ -787,7 +797,7 @@ class MLILClient:
         Resets the MLIL platform to "factory" settings. Only do this IF YOU ARE SURE YOU WANT / NEED TO.
         >>> import mlil
         >>> client = mlil.MLILClient()
-        >>> client.reset_platform()
+        >>> client.reset_deployment_server()
 
         Parameters
         ----------
@@ -809,17 +819,17 @@ class MLILClient:
             really_reset = True
         else:
             really_reset = input(
-                "Are you sure you want to reset the platform? This cannot be undone. (y/n): ").lower() == 'y'
+                "Are you sure you want to restart the deployment server? This cannot be undone. (y/n): ").lower() == 'y'
         if really_reset:
             resp = _reset_platform(url=url, creds=creds)
 
         if verbose:
             if resp.status_code == 200:
                 print(
-                    f'You have become death, destroyer of, well, your platform configuration...')
+                    f'You have become death, destroyer of, well, your platform deployment server...')
             else:
                 print(
-                    f'Something went wrong, request returned a satus code {resp.status_code}')
+                    f'Something went wrong, request returned a status code {resp.status_code}')
         return resp
 
     def get_resource_usage(
@@ -852,7 +862,7 @@ class MLILClient:
                     f'Vroom vroom!')
             else:
                 print(
-                    f'Something went wrong, request returned a satus code {resp.status_code}')
+                    f'Something went wrong, request returned a status code {resp.status_code}')
         return resp
     """
     ###########################################################################
@@ -895,7 +905,7 @@ class MLILClient:
                 print(f'Some people say it is the new oil.')
             else:
                 print(
-                    f'Something went wrong, request returned a satus code {resp.status_code}')
+                    f'Something went wrong, request returned a status code {resp.status_code}')
 
         return resp.json()
 
@@ -944,7 +954,7 @@ class MLILClient:
                 print(f'{file_name} has been loaded into the MLIL datastore.')
             else:
                 print(
-                    f'Something went wrong, request returned a satus code {resp.status_code}')
+                    f'Something went wrong, request returned a status code {resp.status_code}')
 
         return resp.json()
 
@@ -988,7 +998,7 @@ class MLILClient:
                 print(f'{file_name} has been downloaded from the MLIL datastore.')
             else:
                 print(
-                    f'Something went wrong, request returned a satus code {resp.status_code}')
+                    f'Something went wrong, request returned a status code {resp.status_code}')
 
         return resp
 
@@ -1030,7 +1040,7 @@ class MLILClient:
                 print(f'{variable_name} has been fetched.')
             else:
                 print(
-                    f'Something went wrong, request returned a satus code {resp.status_code}')
+                    f'Something went wrong, request returned a status code {resp.status_code}')
 
         return resp.json()
 
@@ -1067,7 +1077,7 @@ class MLILClient:
                 print(f'Varying degrees of inter-variable variablility.')
             else:
                 print(
-                    f'Something went wrong, request returned a satus code {resp.status_code}')
+                    f'Something went wrong, request returned a status code {resp.status_code}')
 
         return resp.json()
 
@@ -1116,7 +1126,7 @@ class MLILClient:
                 print(f'{variable_name} has been uploaded to MLIL.')
             else:
                 print(
-                    f'Something went wrong, request returned a satus code {resp.status_code}')
+                    f'Something went wrong, request returned a status code {resp.status_code}')
 
         return resp.json()
 
@@ -1161,6 +1171,6 @@ class MLILClient:
                 print(f'{variable_name} has been removed from MLIL.')
             else:
                 print(
-                    f'Something went wrong, request returned a satus code {resp.status_code}')
+                    f'Something went wrong, request returned a status code {resp.status_code}')
 
         return resp.json()
