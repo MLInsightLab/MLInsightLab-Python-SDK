@@ -24,7 +24,7 @@ class MLILClient:
 
     def __init__(
         self,
-        use_cached_credentials: bool = False,
+        use_cached_credentials: bool = True,
         auth: dict = None,
         cache_credentials: bool = False
     ):
@@ -88,9 +88,6 @@ class MLILClient:
             if self.config_path.exists():  # TODO implement credential update
                 return self._load_stored_credentials()
         else:
-            if self.config_path.exists() and use_cached_credentials:
-                print('Using stored credentials')
-                # return self._load_stored_credentials()
 
             url = input("Enter platform URL: ")
             username = input("Enter username: ")
