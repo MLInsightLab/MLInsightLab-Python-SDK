@@ -93,7 +93,8 @@ class MLILClient:
             confirmation = ''
             if url is not None:
                 while confirmation not in ['y', 'n']:
-                    confirmation = input('It appears you are using this client from within the platform. Is that true? [y]/n ').lower()
+                    confirmation = input(
+                        'It appears you are using this client from within the platform. Is that true? [y]/n ').lower()
                     if confirmation == '':
                         confirmation = 'y'
             if confirmation in ['', 'n']:
@@ -960,7 +961,7 @@ class MLILClient:
     def download_data(
         self,
         file_name: str,
-        output_format: str,
+        output_file_name: str,
         verbose: bool = False,
         url: str = None,
         creds: dict = None
@@ -976,8 +977,8 @@ class MLILClient:
         ----------
         file_name: str
             The name of the file in the MLIL datastore you wish to download.
-        output_format: str
-            Desired output format for the downloaded file (e.g., 'dms', 'csv', 'json', etc.)
+        output_file_name: str
+            The name of the file to write out to
         """
 
         if url is None:
@@ -989,7 +990,7 @@ class MLILClient:
             url,
             creds,
             file_name=file_name,
-            output_format=output_format
+            output_file_name=output_file_name
         )
 
         if verbose:
