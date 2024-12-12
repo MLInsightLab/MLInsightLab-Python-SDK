@@ -8,4 +8,4 @@ interact with the functionality of the MLIL platform from a Python CLI environme
 from .MLILClient import MLILClient
 
 __all__ = ['MLILClient']
-__version__ = '0.0.6'
+__version__ = '0.0.7'

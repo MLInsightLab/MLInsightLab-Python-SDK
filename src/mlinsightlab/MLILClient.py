@@ -1218,7 +1218,6 @@ class MLILClient:
             if resp.status_code == 200:
                 print('Predictions have been retrieved')
             else:
-                print(f'Something went wrong, request returned a status code of {
-                      resp.status_code}')
+                print(f'Something went wrong, request returned a status code of {resp.status_code}')
 
         return resp.json()
