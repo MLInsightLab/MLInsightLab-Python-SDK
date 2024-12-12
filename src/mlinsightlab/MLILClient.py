@@ -14,7 +14,7 @@ from .user_mgmt import _create_user, _delete_user, _verify_password, _issue_new_
 from .key_mgmt import _create_api_key
 from .model_mgmt import _load_model, _unload_model, _list_models, _predict
 from .platform_mgmt import _reset_platform, _get_platform_resource_usage
-from .data_mgmt import _upload_data, _download_data, _get_variable, _list_data, _list_variables, _set_variable, _delete_variable
+from .data_mgmt import _upload_data, _download_data, _get_variable, _list_data, _list_variables, _set_variable, _delete_variable, _get_predictions
 
 
 class MLILClient:
@@ -1172,5 +1172,53 @@ class MLILClient:
             else:
                 print(
                     f'Something went wrong, request returned a status code {resp.status_code}')
+
+        return resp.json()
+
+    def get_predictions(
+            self,
+            model_name: str,
+            model_flavor: str,
+            model_version_or_alias: str | int,
+            verbose: bool = False,
+            url: str = None,
+            creds: dict = None
+    ):
+        """
+        Gets predictions from a deployed model
+
+        >>> from mlinsightlab import MLILClient
+        >>> client = MLILClient()
+        >>> client.get_predictions()
+
+        Parameters
+        ----------
+        model_name: str
+            The name of the model to get predictions from
+        model_flavor: str
+            The flavor of the model to get predictions from
+        model_version_or_alias: str | int
+            The version or alias of the model to get predictions from
+        """
+
+        if url is None:
+            url = self.url
+        if creds is None:
+            creds = self.creds
+
+        resp = _get_predictions(
+            url,
+            creds,
+            model_name,
+            model_flavor,
+            model_version_or_alias
+        )
+
+        if verbose:
+            if resp.status_code == 200:
+                print('Predictions have been retrieved')
+            else:
+                print(f'Something went wrong, request returned a status code of {
+                      resp.status_code}')
 
         return resp.json()

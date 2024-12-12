@@ -1,6 +1,6 @@
 # Helper functions to manage and interact with MLFlow models
 from .MLILException import MLILException
-from .endpoints import DATA_UPLOAD, DATA_DOWNLOAD, LIST_DATA, GET_VARIABLE, LIST_VARIABLES, SET_VARIABLE, DELETE_VARIABLE
+from .endpoints import DATA_UPLOAD, DATA_DOWNLOAD, LIST_DATA, GET_VARIABLE, LIST_VARIABLES, SET_VARIABLE, DELETE_VARIABLE, GET_PREDICTIONS
 from typing import Any
 import pandas as pd
 import requests
@@ -282,6 +282,45 @@ def _delete_variable(
 
     with requests.Session() as sess:
         resp = sess.delete(
+            url,
+            auth=(creds['username'], creds['key'])
+        )
+
+    if not resp.ok:
+        raise MLILException(str(resp.json()))
+    return resp
+
+
+def _get_predictions(
+        url: str,
+        creds: dict,
+        model_name: str,
+        model_flavor: str,
+        model_version_or_alias: str | int
+):
+    """
+    NOT MEANT TO BE CALLED BY THE END USER
+
+    Gets predictions that a model has made
+
+    Parameters
+    ----------
+    url: str
+        String containing the URL of your deployment of the platform.
+    creds: dict
+        Dictionary that must contain keys "username" and "key", and associated values.
+    model_name: str
+        The name of the model to get predictions from
+    model_flavor: str
+        The flavor of the model to get predictions from
+    model_version: str | int
+        The version of the model to get predictions from
+    """
+    url = f'{
+        url}/{GET_PREDICTIONS}/{model_name}/{model_flavor}/{model_version_or_alias}'
+
+    with requests.Session() as sess:
+        resp = sess.get(
             url,
             auth=(creds['username'], creds['key'])
         )
