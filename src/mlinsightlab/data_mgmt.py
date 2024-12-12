@@ -316,8 +316,7 @@ def _get_predictions(
     model_version: str | int
         The version of the model to get predictions from
     """
-    url = f'{
-        url}/{GET_PREDICTIONS}/{model_name}/{model_flavor}/{model_version_or_alias}'
+    url = f'{url}/{GET_PREDICTIONS}/{model_name}/{model_flavor}/{model_version_or_alias}'
 
     with requests.Session() as sess:
         resp = sess.get(
