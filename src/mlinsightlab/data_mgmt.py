@@ -1,6 +1,6 @@
 # Helper functions to manage and interact with MLFlow models
 from .MLILException import MLILException
-from .endpoints import DATA_UPLOAD, DATA_DOWNLOAD, LIST_DATA, GET_VARIABLE, LIST_VARIABLES, SET_VARIABLE, DELETE_VARIABLE, GET_PREDICTIONS
+from .endpoints import DATA_UPLOAD, DATA_DOWNLOAD, LIST_DATA, GET_VARIABLE, LIST_VARIABLES, SET_VARIABLE, DELETE_VARIABLE, GET_PREDICTIONS, LIST_PREDICTIONS_MODELS
 from typing import Any
 import pandas as pd
 import requests
@@ -326,4 +326,34 @@ def _get_predictions(
 
     if not resp.ok:
         raise MLILException(str(resp.json()))
+    return resp
+
+
+def _list_prediction_models(
+        url: str,
+        creds: dict
+):
+    """
+    NOT MEANT TO BE CALLED BY THE END USER
+
+    Lists models that have stored predictions
+
+    Parameters
+    ----------
+    url: str
+        String containing the URL of your deployment of the platform
+    creds: dict
+        Dictionary that must contain keys "username" and "key", and associated values.
+    """
+    url = f'{url}/{LIST_PREDICTIONS_MODELS}'
+
+    with requests.Session() as sess:
+        resp = sess.get(
+            url,
+            auth=(creds['username'], creds['key'])
+        )
+
+    if not resp.ok:
+        raise MLILException(str(resp.json()))
+
     return resp

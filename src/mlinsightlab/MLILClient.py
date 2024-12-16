@@ -14,7 +14,7 @@ from .user_mgmt import _create_user, _delete_user, _verify_password, _issue_new_
 from .key_mgmt import _create_api_key
 from .model_mgmt import _load_model, _unload_model, _list_models, _predict
 from .platform_mgmt import _reset_platform, _get_platform_resource_usage
-from .data_mgmt import _upload_data, _download_data, _get_variable, _list_data, _list_variables, _set_variable, _delete_variable, _get_predictions
+from .data_mgmt import _upload_data, _download_data, _get_variable, _list_data, _list_variables, _set_variable, _delete_variable, _get_predictions, _list_prediction_models
 
 
 class MLILClient:
@@ -1220,5 +1220,39 @@ class MLILClient:
             else:
                 print(
                     f'Something went wrong, request returned a status code of {resp.status_code}')
+
+        return resp.json()
+
+    def list_prediction_models(
+            self,
+            verbose: bool = False,
+            url: str = None,
+            creds: dict = None
+    ):
+        """
+        Lists models for which predictions are stored
+
+        >>> from mlinsightlab import MLILClient
+        >>> client = MLILClient()
+        >>> client.list_prediction_models()
+        """
+
+        if url is None:
+            url = self.url
+        if creds is None:
+            creds = self.creds
+
+        resp = _list_prediction_models(
+            url,
+            creds
+        )
+
+        if verbose:
+            if resp.status_code == 200:
+                print('Models have been retrieved')
+            else:
+                print(
+                    f'Something went wrong, request returned a status code of {resp.status_code}'
+                )
 
         return resp.json()
