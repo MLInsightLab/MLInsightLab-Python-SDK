@@ -1,2 +1,5 @@
 requests>=2.25.0
 pandas
+sphinx
+sphinx-rtd-theme
+myst-parser
