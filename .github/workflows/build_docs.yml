@@ -3,6 +3,13 @@ name: Build Docs
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
 
 jobs:
   build_docs:
@@ -19,15 +26,16 @@ jobs:
           pip install -r requirements.txt
           pip install sphinx sphinx-rtd-theme myst-parser
         
-    - name: Debug directory structure before build
-      run: |
-        echo "Current directory structure:"
-        ls -R
+      - name: Debug directory structure before build
+        run: |
+          echo "Current directory structure:"
+          ls -R
 
       - name: Build docs
         run: |
           cd docs
           make html
+
       - name: Debug build output
         run: |
           echo "Docs build directory contents:"
