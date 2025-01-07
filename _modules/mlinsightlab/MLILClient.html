@@ -6,7 +6,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>mlinsightlab.MLILClient &mdash; ML Insight Lab Python SDK 0.0.1 documentation</title>
-      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
 
   
@@ -69,33 +69,33 @@
            <div itemprop="articleBody">
              
   <h1>Source code for mlinsightlab.MLILClient</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span>
-<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">import</span> <span class="nn">requests</span>
-<span class="kn">import</span> <span class="nn">getpass</span>
-<span class="kn">import</span> <span class="nn">json</span>
-<span class="kn">import</span> <span class="nn">os</span>
+<span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">getpass</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
 <span class="c1"># from .endpoints import *</span>
 
-<span class="kn">from</span> <span class="nn">.MLILException</span> <span class="kn">import</span> <span class="n">MLILException</span>
-<span class="kn">from</span> <span class="nn">.user_mgmt</span> <span class="kn">import</span> <span class="n">_create_user</span><span class="p">,</span> <span class="n">_delete_user</span><span class="p">,</span> <span class="n">_verify_password</span><span class="p">,</span> <span class="n">_issue_new_password</span><span class="p">,</span> <span class="n">_get_user_role</span><span class="p">,</span> <span class="n">_update_user_role</span><span class="p">,</span> <span class="n">_list_users</span>
-<span class="kn">from</span> <span class="nn">.key_mgmt</span> <span class="kn">import</span> <span class="n">_create_api_key</span>
-<span class="kn">from</span> <span class="nn">.model_mgmt</span> <span class="kn">import</span> <span class="n">_load_model</span><span class="p">,</span> <span class="n">_unload_model</span><span class="p">,</span> <span class="n">_list_models</span><span class="p">,</span> <span class="n">_predict</span>
-<span class="kn">from</span> <span class="nn">.platform_mgmt</span> <span class="kn">import</span> <span class="n">_reset_platform</span><span class="p">,</span> <span class="n">_get_platform_resource_usage</span>
-<span class="kn">from</span> <span class="nn">.data_mgmt</span> <span class="kn">import</span> <span class="n">_upload_data</span><span class="p">,</span> <span class="n">_download_data</span><span class="p">,</span> <span class="n">_get_variable</span><span class="p">,</span> <span class="n">_list_data</span><span class="p">,</span> <span class="n">_list_variables</span><span class="p">,</span> <span class="n">_set_variable</span><span class="p">,</span> <span class="n">_delete_variable</span><span class="p">,</span> <span class="n">_get_predictions</span><span class="p">,</span> <span class="n">_list_prediction_models</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.MLILException</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLILException</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.user_mgmt</span><span class="w"> </span><span class="kn">import</span> <span class="n">_create_user</span><span class="p">,</span> <span class="n">_delete_user</span><span class="p">,</span> <span class="n">_verify_password</span><span class="p">,</span> <span class="n">_issue_new_password</span><span class="p">,</span> <span class="n">_get_user_role</span><span class="p">,</span> <span class="n">_update_user_role</span><span class="p">,</span> <span class="n">_list_users</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.key_mgmt</span><span class="w"> </span><span class="kn">import</span> <span class="n">_create_api_key</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.model_mgmt</span><span class="w"> </span><span class="kn">import</span> <span class="n">_load_model</span><span class="p">,</span> <span class="n">_unload_model</span><span class="p">,</span> <span class="n">_list_models</span><span class="p">,</span> <span class="n">_predict</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.platform_mgmt</span><span class="w"> </span><span class="kn">import</span> <span class="n">_reset_platform</span><span class="p">,</span> <span class="n">_get_platform_resource_usage</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.data_mgmt</span><span class="w"> </span><span class="kn">import</span> <span class="n">_upload_data</span><span class="p">,</span> <span class="n">_download_data</span><span class="p">,</span> <span class="n">_get_variable</span><span class="p">,</span> <span class="n">_list_data</span><span class="p">,</span> <span class="n">_list_variables</span><span class="p">,</span> <span class="n">_set_variable</span><span class="p">,</span> <span class="n">_delete_variable</span><span class="p">,</span> <span class="n">_get_predictions</span><span class="p">,</span> <span class="n">_list_prediction_models</span>
 
 
 <div class="viewcode-block" id="MLILClient">
 <a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.MLILClient.MLILClient">[docs]</a>
-<span class="k">class</span> <span class="nc">MLILClient</span><span class="p">:</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">MLILClient</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Client for interacting with the ML Insights Lab (MLIL) Platform</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">use_cached_credentials</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">auth</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -151,7 +151,7 @@
 <span class="sd">    ###########################################################################</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">_login</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_cached_credentials</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_login</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_cached_credentials</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Authenticates user.</span>
 
@@ -200,7 +200,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_save_credentials</span><span class="p">(</span><span class="n">auth</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">auth</span>
 
-    <span class="k">def</span> <span class="nf">_load_stored_credentials</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_load_stored_credentials</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Loads stored credentials from the config file.</span>
 
@@ -209,7 +209,7 @@
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_save_credentials</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">auth</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_save_credentials</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">auth</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Saves credentials to the config file.</span>
 
@@ -221,7 +221,7 @@
 
 <div class="viewcode-block" id="MLILClient.purge_credentials">
 <a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.MLILClient.MLILClient.purge_credentials">[docs]</a>
-    <span class="k">def</span> <span class="nf">purge_credentials</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">purge_credentials</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Enables user to delete the file containing cached credentials.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -241,7 +241,7 @@
 
 <div class="viewcode-block" id="MLILClient.create_user">
 <a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.MLILClient.MLILClient.create_user">[docs]</a>
-    <span class="k">def</span> <span class="nf">create_user</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create_user</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">role</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
@@ -292,7 +292,7 @@
 
 <div class="viewcode-block" id="MLILClient.delete_user">
 <a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.MLILClient.MLILClient.delete_user">[docs]</a>
-    <span class="k">def</span> <span class="nf">delete_user</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">delete_user</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">username</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -335,7 +335,7 @@
 
 <div class="viewcode-block" id="MLILClient.verify_password">
 <a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.MLILClient.MLILClient.verify_password">[docs]</a>
-    <span class="k">def</span> <span class="nf">verify_password</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">verify_password</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">password</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -383,7 +383,7 @@
 
 <div class="viewcode-block" id="MLILClient.issue_new_password">
 <a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.MLILClient.MLILClient.issue_new_password">[docs]</a>
-    <span class="k">def</span> <span class="nf">issue_new_password</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">issue_new_password</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">new_password</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">overwrite_password</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -451,7 +451,7 @@
 
 <div class="viewcode-block" id="MLILClient.get_user_role">
 <a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.MLILClient.MLILClient.get_user_role">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_user_role</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_user_role</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">username</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -494,7 +494,7 @@
 
 <div class="viewcode-block" id="MLILClient.update_user_role">
 <a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.MLILClient.MLILClient.update_user_role">[docs]</a>
-    <span class="k">def</span> <span class="nf">update_user_role</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">update_user_role</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">username</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">new_role</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -540,7 +540,7 @@
 
 <div class="viewcode-block" id="MLILClient.list_users">
 <a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.MLILClient.MLILClient.list_users">[docs]</a>
-    <span class="k">def</span> <span class="nf">list_users</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">list_users</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">creds</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -585,7 +585,7 @@
 
 <div class="viewcode-block" id="MLILClient.issue_api_key">
 <a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.MLILClient.MLILClient.issue_api_key">[docs]</a>
-    <span class="k">def</span> <span class="nf">issue_api_key</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">issue_api_key</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">username</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">password</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -641,7 +641,7 @@
 
 <div class="viewcode-block" id="MLILClient.load_model">
 <a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.MLILClient.MLILClient.load_model">[docs]</a>
-    <span class="k">def</span> <span class="nf">load_model</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">load_model</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">model_flavor</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -718,7 +718,7 @@
 
 <div class="viewcode-block" id="MLILClient.list_models">
 <a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.MLILClient.MLILClient.list_models">[docs]</a>
-    <span class="k">def</span> <span class="nf">list_models</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">list_models</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">creds</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -758,7 +758,7 @@
 
 <div class="viewcode-block" id="MLILClient.unload_model">
 <a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.MLILClient.MLILClient.unload_model">[docs]</a>
-    <span class="k">def</span> <span class="nf">unload_model</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">unload_model</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">model_flavor</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -817,7 +817,7 @@
 
 <div class="viewcode-block" id="MLILClient.predict">
 <a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.MLILClient.MLILClient.predict">[docs]</a>
-    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">predict</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">model_flavor</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -900,7 +900,7 @@
 
 <div class="viewcode-block" id="MLILClient.reset_deployment_server">
 <a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.MLILClient.MLILClient.reset_deployment_server">[docs]</a>
-    <span class="k">def</span> <span class="nf">reset_deployment_server</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">reset_deployment_server</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">failsafe</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -949,7 +949,7 @@
 
 <div class="viewcode-block" id="MLILClient.get_resource_usage">
 <a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.MLILClient.MLILClient.get_resource_usage">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_resource_usage</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_resource_usage</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">creds</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -990,7 +990,7 @@
 
 <div class="viewcode-block" id="MLILClient.list_data">
 <a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.MLILClient.MLILClient.list_data">[docs]</a>
-    <span class="k">def</span> <span class="nf">list_data</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">list_data</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1032,7 +1032,7 @@
 
 <div class="viewcode-block" id="MLILClient.upload_data">
 <a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.MLILClient.MLILClient.upload_data">[docs]</a>
-    <span class="k">def</span> <span class="nf">upload_data</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">upload_data</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -1084,7 +1084,7 @@
 
 <div class="viewcode-block" id="MLILClient.download_data">
 <a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.MLILClient.MLILClient.download_data">[docs]</a>
-    <span class="k">def</span> <span class="nf">download_data</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">download_data</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">output_file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -1131,7 +1131,7 @@
 
 <div class="viewcode-block" id="MLILClient.get_variable">
 <a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.MLILClient.MLILClient.get_variable">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_variable</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_variable</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">variable_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -1176,7 +1176,7 @@
 
 <div class="viewcode-block" id="MLILClient.list_variables">
 <a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.MLILClient.MLILClient.list_variables">[docs]</a>
-    <span class="k">def</span> <span class="nf">list_variables</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">list_variables</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">creds</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1216,7 +1216,7 @@
 
 <div class="viewcode-block" id="MLILClient.set_variable">
 <a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.MLILClient.MLILClient.set_variable">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_variable</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">set_variable</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">variable_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
@@ -1268,7 +1268,7 @@
 
 <div class="viewcode-block" id="MLILClient.delete_variable">
 <a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.MLILClient.MLILClient.delete_variable">[docs]</a>
-    <span class="k">def</span> <span class="nf">delete_variable</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">delete_variable</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">variable_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -1316,7 +1316,7 @@
 
 <div class="viewcode-block" id="MLILClient.get_predictions">
 <a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.MLILClient.MLILClient.get_predictions">[docs]</a>
-    <span class="k">def</span> <span class="nf">get_predictions</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_predictions</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
             <span class="n">model_flavor</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
@@ -1367,7 +1367,7 @@
 
 <div class="viewcode-block" id="MLILClient.list_prediction_models">
 <a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.MLILClient.MLILClient.list_prediction_models">[docs]</a>
-    <span class="k">def</span> <span class="nf">list_prediction_models</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">list_prediction_models</span><span class="p">(</span>
             <span class="bp">self</span><span class="p">,</span>
             <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
             <span class="n">url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
