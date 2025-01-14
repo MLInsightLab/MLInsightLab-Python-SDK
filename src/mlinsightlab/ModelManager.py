@@ -8,7 +8,7 @@ class ModelManager:
 
     def __init__(
         self,
-        model_image: str = 'ghcr.io/mlinsighttechnologies/mlinsightlab-model-container:main',
+        model_image: str = 'ghcr.io/mlinsightlab/mlinsightlab-model-container:main',
         model_network: str = 'mlinsightlab_model_network',
         mlflow_tracking_uri: str = 'http://mlflow:2244',
         model_port: str = '8888'
@@ -16,7 +16,7 @@ class ModelManager:
         """
         Parameters
         ----------
-        model_image : str (default 'ghcr.io/mlinsighttechnologies/mlinsightlab-model-container:main)'
+        model_image : str (default 'ghcr.io/mlinsightlab/mlinsightlab-model-container:main)'
             The image of the container to use
         model_network : str (default 'mlinsightlab_model_network')
             The network to deploy the models to
