@@ -13,7 +13,7 @@ from .MLILException import MLILException
 from .user_mgmt import _create_user, _delete_user, _verify_password, _issue_new_password, _get_user_role, _update_user_role, _list_users
 from .key_mgmt import _create_api_key
 from .model_mgmt import _load_model, _unload_model, _list_models, _predict
-from .platform_mgmt import _reset_platform, _get_platform_resource_usage
+from .platform_mgmt import _reset_platform, _get_platform_resource_usage, _restart_jupyter
 from .data_mgmt import _upload_data, _download_data, _get_variable, _list_data, _list_variables, _set_variable, _delete_variable, _get_predictions, _list_prediction_models
 
 
@@ -830,6 +830,41 @@ class MLILClient:
             else:
                 print(
                     f'Something went wrong, request returned a status code {resp.status_code}')
+        return resp
+
+    def restart_jupyter(
+        self,
+        url: str = None,
+        creds: dict = None,
+        verbose: bool = False
+    ):
+        """
+        Resets the Jupyter service within the platform
+        >>> import mlil
+        >>> client = mlil.MLILClient()
+        >>> client.restart_jupyter()
+
+        Parameters
+        ----------
+        This function takes no parameters.
+        """
+
+        if url is None:
+            url = self.url
+        if creds is None:
+            creds = self.creds
+
+        resp = _restart_jupyter(url=url, creds=creds)
+
+        if verbose:
+            if resp.status_code == 200:
+                print(
+                    'Jupyter is no longer a planet'
+                )
+            else:
+                print(
+                    f'Something went wrong, request returned a status code {resp.status_code}'
+                )
         return resp
 
     def get_resource_usage(

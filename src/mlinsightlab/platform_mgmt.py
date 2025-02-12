@@ -1,6 +1,6 @@
 # Perform platform admin tasks
 from .MLILException import MLILException
-from .endpoints import RESET_ENDPOINT, RESOURCE_USAGE
+from .endpoints import RESET_ENDPOINT, RESTART_JUPYTER_ENDPOINT, RESOURCE_USAGE
 import requests
 
 
@@ -26,7 +26,36 @@ def _reset_platform(
     with requests.Session() as sess:
         resp = sess.get(
             url,
-            auth=(creds['username'], creds['key']),
+            auth=(creds['username'], creds['key'])
+        )
+    if not resp.ok:
+        raise MLILException(str(resp.json()))
+    return resp
+
+
+def _restart_jupyter(
+        url: str,
+        creds: dict
+):
+    """
+    NOT MEANT TO BE CALLED BY THE END USER
+
+    Restarts the Jupyter service
+
+    Parameters
+    ----------
+    url: str
+        String containing the URL of your deployment of the platform.
+    creds:
+        Dictionary that must contain keys "username" and "key", and associated values.
+    """
+
+    url = f"{url}/{RESTART_JUPYTER_ENDPOINT}"
+
+    with requests.Session() as sess:
+        resp = sess.get(
+            url,
+            auth=(creds['username'], creds['key'])
         )
     if not resp.ok:
         raise MLILException(str(resp.json()))
