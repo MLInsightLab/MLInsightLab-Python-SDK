@@ -64,6 +64,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#mlinsightlab.MLILClient.MLILClient.predict"><code class="docutils literal notranslate"><span class="pre">MLILClient.predict()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mlinsightlab.MLILClient.MLILClient.purge_credentials"><code class="docutils literal notranslate"><span class="pre">MLILClient.purge_credentials()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mlinsightlab.MLILClient.MLILClient.reset_deployment_server"><code class="docutils literal notranslate"><span class="pre">MLILClient.reset_deployment_server()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mlinsightlab.MLILClient.MLILClient.restart_jupyter"><code class="docutils literal notranslate"><span class="pre">MLILClient.restart_jupyter()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mlinsightlab.MLILClient.MLILClient.set_variable"><code class="docutils literal notranslate"><span class="pre">MLILClient.set_variable()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mlinsightlab.MLILClient.MLILClient.unload_model"><code class="docutils literal notranslate"><span class="pre">MLILClient.unload_model()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mlinsightlab.MLILClient.MLILClient.update_user_role"><code class="docutils literal notranslate"><span class="pre">MLILClient.update_user_role()</span></code></a></li>
@@ -476,6 +477,20 @@ Should only be set to False if you are scripting and/or know what you are doing.
 <li><p><strong>url</strong> (<em>str</em>) – String containing the URL of your deployment of the platform.</p></li>
 <li><p><strong>creds</strong> (<em>dict = None</em>) – Dictionary that must contain keys “username” and “key”, and associated values.</p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlinsightlab.MLILClient.MLILClient.restart_jupyter">
+<span class="sig-name descname"><span class="pre">restart_jupyter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">creds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mlinsightlab/MLILClient.html#MLILClient.restart_jupyter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlinsightlab.MLILClient.MLILClient.restart_jupyter" title="Link to this definition"></a></dt>
+<dd><p>Resets the Jupyter service within the platform
+&gt;&gt;&gt; import mlil
+&gt;&gt;&gt; client = mlil.MLILClient()
+&gt;&gt;&gt; client.restart_jupyter()</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>parameters.</strong> (<em>This function takes no</em>)</p>
 </dd>
 </dl>
 </dd></dl>

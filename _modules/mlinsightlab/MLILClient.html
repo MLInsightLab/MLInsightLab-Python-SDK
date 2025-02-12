@@ -84,7 +84,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.user_mgmt</span><span class="w"> </span><span class="kn">import</span> <span class="n">_create_user</span><span class="p">,</span> <span class="n">_delete_user</span><span class="p">,</span> <span class="n">_verify_password</span><span class="p">,</span> <span class="n">_issue_new_password</span><span class="p">,</span> <span class="n">_get_user_role</span><span class="p">,</span> <span class="n">_update_user_role</span><span class="p">,</span> <span class="n">_list_users</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.key_mgmt</span><span class="w"> </span><span class="kn">import</span> <span class="n">_create_api_key</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.model_mgmt</span><span class="w"> </span><span class="kn">import</span> <span class="n">_load_model</span><span class="p">,</span> <span class="n">_unload_model</span><span class="p">,</span> <span class="n">_list_models</span><span class="p">,</span> <span class="n">_predict</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">.platform_mgmt</span><span class="w"> </span><span class="kn">import</span> <span class="n">_reset_platform</span><span class="p">,</span> <span class="n">_get_platform_resource_usage</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.platform_mgmt</span><span class="w"> </span><span class="kn">import</span> <span class="n">_reset_platform</span><span class="p">,</span> <span class="n">_get_platform_resource_usage</span><span class="p">,</span> <span class="n">_restart_jupyter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.data_mgmt</span><span class="w"> </span><span class="kn">import</span> <span class="n">_upload_data</span><span class="p">,</span> <span class="n">_download_data</span><span class="p">,</span> <span class="n">_get_variable</span><span class="p">,</span> <span class="n">_list_data</span><span class="p">,</span> <span class="n">_list_variables</span><span class="p">,</span> <span class="n">_set_variable</span><span class="p">,</span> <span class="n">_delete_variable</span><span class="p">,</span> <span class="n">_get_predictions</span><span class="p">,</span> <span class="n">_list_prediction_models</span>
 
 
@@ -944,6 +944,44 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;Something went wrong, request returned a status code </span><span class="si">{</span><span class="n">resp</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">resp</span></div>
+
+
+<div class="viewcode-block" id="MLILClient.restart_jupyter">
+<a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.MLILClient.MLILClient.restart_jupyter">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">restart_jupyter</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">creds</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Resets the Jupyter service within the platform</span>
+<span class="sd">        &gt;&gt;&gt; import mlil</span>
+<span class="sd">        &gt;&gt;&gt; client = mlil.MLILClient()</span>
+<span class="sd">        &gt;&gt;&gt; client.restart_jupyter()</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        This function takes no parameters.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span>
+        <span class="k">if</span> <span class="n">creds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">creds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">creds</span>
+
+        <span class="n">resp</span> <span class="o">=</span> <span class="n">_restart_jupyter</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">creds</span><span class="o">=</span><span class="n">creds</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="s1">&#39;Jupyter is no longer a planet&#39;</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s1">&#39;Something went wrong, request returned a status code </span><span class="si">{</span><span class="n">resp</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="p">)</span>
         <span class="k">return</span> <span class="n">resp</span></div>
 
 
