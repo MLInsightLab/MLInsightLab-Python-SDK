@@ -63,4 +63,4 @@ file containing your credentials, you can also do so via the Python client.
 
 ```python
 client.purge_credentials()
-'''
+```
