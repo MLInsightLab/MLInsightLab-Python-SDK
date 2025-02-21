@@ -342,8 +342,8 @@ class MLILClient:
                 print(
                     f'Something went wrong, request returned a status code {resp.status_code}')
 
-        # Return the response
-        return resp
+        # Return True if correct
+        return True
 
     def issue_new_password(
         self,
@@ -947,7 +947,7 @@ class MLILClient:
                     f'Something went wrong, request returned a status code {resp.status_code}')
 
         # Return the response
-        return resp
+        return resp.json()
 
     def restart_jupyter(
         self,
@@ -992,7 +992,7 @@ class MLILClient:
                 )
 
         # Return the response
-        return resp
+        return resp.json()
 
     def get_resource_usage(
         self,
@@ -1035,7 +1035,7 @@ class MLILClient:
                     f'Something went wrong, request returned a status code {resp.status_code}')
 
         # Return the response
-        return resp
+        return resp.json()
 
     '''
     ###########################################################################
@@ -1045,7 +1045,7 @@ class MLILClient:
 
     def list_data(
         self,
-        directory: str,
+        directory: str = None,
         url: str = None,
         creds: dict = None,
         verbose: bool = False
@@ -1059,7 +1059,7 @@ class MLILClient:
 
         Parameters
         ----------
-        directory: str
+        directory: str or None (default None)
             The directory to list
         url: str or None (default None)
             String containing the URL of your deployment of the platform.
@@ -1096,7 +1096,7 @@ class MLILClient:
     def upload_data(
         self,
         file_path: str,
-        file_name: str,
+        file_name: str = None,
         overwrite: bool = False,
         url: str = None,
         creds: dict = None,
@@ -1113,7 +1113,7 @@ class MLILClient:
         ----------
         file_path: str
             The path of the file to be uploaded.
-        file_name: str
+        file_name: str or None (default None)
             The name to give your file in the MLIL datastore.
         overwrite: bool = False
             Whether or not to delete any files called <filename> that
@@ -1126,11 +1126,16 @@ class MLILClient:
             Whether to log verbosely
         '''
 
+        # Get parameters as needed
         if url is None:
             url = self.url
         if creds is None:
             creds = self.creds
 
+        if file_name is None:
+            file_name = file_path
+
+        # Run the upload_data function
         resp = _upload_data(
             url,
             creds,
@@ -1139,6 +1144,7 @@ class MLILClient:
             overwrite=overwrite
         )
 
+        # Log if verbose
         if verbose:
             if resp.status_code == 200:
                 print(f'{file_name} has been loaded into the MLIL datastore.')
@@ -1146,6 +1152,7 @@ class MLILClient:
                 print(
                     f'Something went wrong, request returned a status code {resp.status_code}')
 
+        # Return response
         return resp.json()
 
     def download_data(
@@ -1199,7 +1206,7 @@ class MLILClient:
                 print(
                     f'Something went wrong, request returned a status code {resp.status_code}')
 
-        # Return the response
+        # Return the response, which is True if it was successful
         return resp
 
     def get_variable(
