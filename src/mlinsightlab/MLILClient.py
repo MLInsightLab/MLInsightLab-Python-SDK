@@ -1,8 +1,5 @@
 from typing import Union, List, Optional, Any
 from pathlib import Path
-import pandas as pd
-import warnings
-import requests
 import getpass
 import json
 import os
@@ -18,25 +15,25 @@ from .data_mgmt import _upload_data, _download_data, _get_variable, _list_data, 
 
 
 class MLILClient:
-    """
-    Client for interacting with the ML Insights Lab (MLIL) Platform
-    """
+    '''
+    Client for interacting with the ML Insight Lab (MLIL) Platform
+    '''
 
     def __init__(
         self,
         use_cached_credentials: bool = True,
-        auth: dict = None,
-        cache_credentials: bool = False
+        auth: dict | None = None,
+        cache_credentials: bool = True
     ):
-        """
+        '''
         Initializes the class and sets configuration variables.
 
         Parameters
         ----------
-        use_cached_credentials: bool = False
+        use_cached_credentials: bool (default True)
             Login using credentials that have been previosuly cached on your system.
             Bypasses the interactive login flow.
-        auth: dict = None
+        auth: dict or None (default None)
             Dictionary of credentials to use for the instantiated client.
             Must be of structure:
             {
@@ -45,163 +42,204 @@ class MLILClient:
                 'password':your user password,
                 'url':the base URL of your platform
             }
-        cache_credentials: bool = False
+        cache_credentials: bool = True
             If you provided an auth dictionary, whether you would like to cache those credentials for future use.
-        """
+        '''
 
-        self.config_path = Path((f"{Path.home()}/.mlil/config.json"))
+        # Configuration path
+        self.config_path = Path((f'{Path.home()}/.mlil/config.json'))
 
+        # Try to log in using cached credentials as directed
         if auth is None:
             auth = self._login(use_cached_credentials=use_cached_credentials)
 
+        # Get the authentication information from the auth credentials
         self.username = auth.get('username')
         self.api_key = auth.get('key')
         self.url = auth.get('url')
         self.password = auth.get('password')
 
+
+        # Raise any errors as needed
         if not self.username or not self.api_key or not self.password:
             raise ValueError(
-                "You must provide your username, password, and API key.")
-
+                'You must provide your username, password, and API key.')
         if not self.url:
             raise ValueError(
-                "You must provide the base URL of your instance of the platform.")
+                'You must provide the base URL of your instance of the platform.')
 
+        # Set and save credentials as directed
         self.creds = {'username': self.username, 'key': self.api_key}
-
         if cache_credentials:
             self._save_credentials(auth)
 
-    """
+
+    '''
     ###########################################################################
     ########################## Login Operations ################################
     ###########################################################################
-    """
+    '''
 
     def _login(self, use_cached_credentials):
-        """
+        '''
         Authenticates user.
 
         Not meant to be called by the user directly.
-        """
+        '''
+
+        # Load the stored credentials if possible
         if use_cached_credentials and self.config_path.exists():
             return self._load_stored_credentials()
+        
         else:
 
             # Check for environment variables indicating that the user is logging in from Jupyter
             url = os.getenv('API_URL')
             confirmation = ''
+            
+            # Ask the user if they're logging in from the platform
             if url is not None:
                 while confirmation not in ['y', 'n']:
                     confirmation = input(
                         'It appears you are using this client from within the platform. Is that true? [y]/n ').lower()
                     if confirmation == '':
                         confirmation = 'y'
-            if confirmation in ['', 'n']:
-                url = input("Enter platform URL: ")
+            
+            # If the user is not in the Jupyter instance of the platform, then ask for the platform URL
+            if confirmation == 'n':
+                url = input('Enter platform URL: ')
                 if not url.endswith('api'):
                     url += '/api'
-            username = input("Enter username: ")
-            password = getpass.getpass("Enter password: ")
-            api_key = getpass.getpass(
-                "Enter API key (or leave blank to generate new): ")
 
+            # Get all other configuration parameters
+            username = input('Enter username: ')
+            password = getpass.getpass('Enter password: ')
+            api_key = getpass.getpass(
+                'Enter API key (or leave blank to generate new): ')
+
+            # Generate a new API key
             if not api_key:
                 generate_new = input(
-                    "Generate new API key? [y]/n ").lower() in ['', 'y']
+                    'Generate new API key? [y]/n ').lower() in ['', 'y']
                 if generate_new:
                     api_key = self.issue_api_key(
                         username=username, password=password, url=url).json()
 
+            # Verify the password
             resp = self.verify_password(url=url, creds={
-                                        "username": username, "key": api_key}, username=username, password=password)
+                                        'username': username, 'key': api_key}, username=username, password=password)
 
+            # Verify that the response is okay, raise exception otherwise
             if resp.ok:
-                print(f"User verified. Welcome {username}!")
+                print(f'User verified. Welcome {username}!')
             else:
                 print('User not verified.')
                 raise MLILException(str(resp.json()))
 
+            # Return authentication information
             auth = {'username': username, 'key': api_key,
                     'url': url, 'password': password}
-            self._save_credentials(auth)
             return auth
 
     def _load_stored_credentials(self):
-        """
+        '''
         Loads stored credentials from the config file.
 
         This function is not meant to be called by the user directly.
-        """
+        '''
+
+        # Open and load the file
         with open(self.config_path, 'r') as f:
             return json.load(f)
 
     def _save_credentials(self, auth):
-        """
+        '''
         Saves credentials to the config file.
 
         This function is not meant to be called by the user directly.
-        """
+        '''
+
+        # Create all subdirectories for the file as needed
         self.config_path.parent.mkdir(parents=True, exist_ok=True)
+
+        # Write the file
         with open(self.config_path, 'w') as f:
             json.dump(auth, f)
 
-    def purge_credentials(self):
-        """
+    def purge_credentials(self, ask = True):
+        '''
         Enables user to delete the file containing cached credentials.
-        """
-        purge_creds = input(
-            "Are you sure you want to delete your saved credentials? This cannot be undone. (y/n): ").lower() == 'y'
+
+        Parameters
+        ----------
+        ask : bool (default True)
+            Whether to ask for confirmation
+        '''
+
+        if ask:
+            purge_creds = input(
+                'Are you sure you want to delete your saved credentials? This cannot be undone. (y/n): ').lower() == 'y'
+        else:
+            purge_creds = True
+
         if purge_creds:
             if os.path.exists(self.config_path):
                 os.remove(self.config_path)
             else:
-                print("No credentials file found.")
-    """
+                print('No credentials file found.')
+
+
+    '''
     ###########################################################################
     ########################## User Operations ################################
     ###########################################################################
-    """
+    '''
 
     def create_user(
         self,
-        role: str | None,
-        api_key: str | None,
-        password: str | None,
         username: str,
+        role: str,
+        password: str | None = None,
+        api_key: str | None = None,
         url: str = None,
         creds: dict = None,
         verbose: bool = False
     ):
-        """
+        '''
         Create a user within the platform.
 
-        >>> import mlil
-        >>> client = mlil.MLILClient()
-        >>> client.create_user()
+        >>> from mlinsightlab import MLILClient
+        >>> client = MLILClient()
+        >>> client.create_user('username')
 
         Parameters
         ----------
-        url: str
-            String containing the URL of your deployment of the platform.
-        creds:
-            Dictionary that must contain keys "username" and "key", and associated values.
         username: str
-            The user's display name and login credential
+            The username of the user
         role: str
-            The role to be given to the user
-        api_key: str or NULL
-            An API key for the new user
-        password: str or NULL
-            Password for user login
-        """
+            The role of the user
+        password: str
+            The password for the user. If not provided, will be generated
+        api_key: str or None (default None)
+            The API key for the user. If not provided, will be generated
+        url: str or None (default None)
+            The URL for the platform. If not provided, will use client parameters
+        creds: dict or None (default None)
+            The credentials to use to authenticate with the platform. If not provided, will use client parameters
+        verbose: bool (default False)
+            Whether to print intermediate results
+        '''
+
+        # Get parameters as necessary from the client
         if url is None:
             url = self.url
         if creds is None:
             creds = self.creds
 
+        # Create user
         resp = _create_user(url, creds, username, role, api_key, password)
 
+        # Log if verbose
         if verbose:
             if resp.status_code == 200:
                 print(f'user {username} is now on the platform! Go say hi!')
@@ -209,6 +247,7 @@ class MLILClient:
                 print(
                     f'Something went wrong, request returned a status code {resp.status_code}')
 
+        # Return the response
         return resp.json()
 
     def delete_user(
@@ -218,29 +257,36 @@ class MLILClient:
         creds: dict = None,
         verbose: bool = False
     ):
-        """
+        '''
         Delete a user of the platform.
 
-        >>> import mlil
-        >>> client = mlil.MLILClient()
-        >>> client.delete_user()
+        >>> from mlinsightlab import MLILClient
+        >>> client = MLILClient()
+        >>> client.delete_user('username')
 
         Parameters
         ----------
-        url: str
-            String containing the URL of your deployment of the platform.
-        creds:
-            Dictionary that must contain keys "username" and "key", and associated values.
         username: str
-            The display name of the user to be deleted.
-        """
+            The username of the user to delete
+        url: str or None (default None)
+            The URL for the platform. If not provided, will use client parameters
+        creds: dict or None (default None)
+            The credentials to use to authenticate with the platform. If not provided, will use client parameters
+        verbose: bool (default False)
+            Whether to print intermediate results
+        
+        '''
+
+        # Populate parameters from client as necessary
         if url is None:
             url = self.url
         if creds is None:
             creds = self.creds
 
+        # Run the delete user function
         resp = _delete_user(url, creds, username)
 
+        # Print as needed for verbosity requested
         if verbose:
             if resp.status_code == 200:
                 print(
@@ -249,6 +295,7 @@ class MLILClient:
                 print(
                     f'Something went wrong, request returned a status code {resp.status_code}')
 
+        # Return the response
         return resp.json()
 
     def verify_password(
@@ -259,24 +306,26 @@ class MLILClient:
         username: str = None,
         verbose: bool = False
     ):
-        """
+        '''
         Verify a user's password.
 
-        >>> import mlil
-        >>> client = mlil.MLILClient()
-        >>> client.verify_password()
+        >>> from mlinsightlab import MLILClient
+        >>> client = MLILClient()
+        >>> client.verify_password('my_password')
 
         Parameters
         ----------
-        url: str
-            String containing the URL of your deployment of the platform.
-        creds:
-            Dictionary that must contain keys "username" and "key", and associated values.
-        username: str
-            The user's display name and login credential
         password: str
-            Password for user login.
-        """
+            The password to verify
+        url: str or None (default None)
+            The URL for the platform. If not provided, will use client parameters
+        creds: dict or None (default None)
+            The credentials to use to authenticate with the platform. If not provided, will use client parameters
+        verbose: bool (default False)
+            Whether to print intermediate results
+        '''
+
+        # Use parameters from the client as necessary
         if url is None:
             url = self.url
         if creds is None:
@@ -284,8 +333,10 @@ class MLILClient:
         if username is None:
             username = self.username
 
+        # Run the verify password function
         resp = _verify_password(url, creds, username, password)
 
+        # Print results if verbosity requested
         if verbose:
             if resp.status_code == 200:
                 print(
@@ -294,42 +345,46 @@ class MLILClient:
                 print(
                     f'Something went wrong, request returned a status code {resp.status_code}')
 
+        # Return the response
         return resp
 
     def issue_new_password(
         self,
         new_password: str,
+        username: str = None,
         overwrite_password: bool = True,
         url: str = None,
         creds: dict = None,
-        username: str = None,
         verbose: bool = False
     ):
-        """
+        '''
         Create a new a password for an existing user.
 
-        >>> import mlil
-        >>> client = mlil.MLILClient()
-        >>> client.issue_new_password()
+        >>> from mlinsightlab import MLILClient
+        >>> client = MLILClient()
+        >>> client.issue_new_password('new_password')
 
         Parameters
         ----------
-
         new_password: str
             New password for user authentication.
             It must have:
             - At least 8 characters
             - At least 1 uppercase character
             - At least 1 lowercase character
-        overwrite_password: bool = True
-            Whether or not to overwrite the password in the config file. Defaults to True.
-        url: str
-            String containing the URL of your deployment of the platform.
-        creds:
-            Dictionary that must contain keys "username" and "key", and associated values.
-        username: str
+        username: str or None (default None)
             The user's display name and login credential
-        """
+        overwrite_password: bool (default True)
+            Whether or not to overwrite the password in the config file.
+        url: str or None (default None)
+            String containing the URL of your deployment of the platform.
+        creds: dict or None (default None)
+            Dictionary that must contain keys 'username' and 'key', and associated values.
+        verbose: bool (default False)
+            Whether to log verbosely
+        '''
+
+        # Get parameters as necessary from client
         if url is None:
             url = self.url
         if creds is None:
@@ -337,20 +392,25 @@ class MLILClient:
         if username is None:
             username = self.username
 
+        # Run the issue new password function
         resp = _issue_new_password(
             url, creds, username, new_password=new_password)
 
+        # Set new password for client
         if resp.ok:
             self.password = new_password
         else:
             return MLILException(str(resp.json()))
 
+        # If overwrite, save the password
         if overwrite_password:
             auth = {'username': self.username, 'key': self.api_key,
                     'url': url, 'password': new_password}
             print(f'Your password has been overwritten.')
             self._save_credentials(auth)
 
+
+        # Log if verbose
         if verbose:
             if resp.status_code == 200:
                 print(
@@ -359,6 +419,7 @@ class MLILClient:
                 print(
                     f'Something went wrong, request returned a status code {resp.status_code}')
 
+        # Return the response
         return resp.json()
 
     def get_user_role(
@@ -368,11 +429,11 @@ class MLILClient:
         creds: dict = None,
         verbose: bool = False
     ):
-        """
+        '''
         Check a user's role.
 
-        >>> import mlil
-        >>> client = mlil.MLILClient()
+        >>> from mlinsightlab import MLILClient
+        >>> client = MLILClient()
         >>> client.get_user_role()
 
         Parameters
@@ -380,10 +441,10 @@ class MLILClient:
         url: str
             String containing the URL of your deployment of the platform.
         creds:
-            Dictionary that must contain keys "username" and "key", and associated values.
+            Dictionary that must contain keys 'username' and 'key', and associated values.
         username: str
             The user's display name and login credential.
-        """
+        '''
         if url is None:
             url = self.url
         if creds is None:
@@ -409,11 +470,11 @@ class MLILClient:
         creds: dict = None,
         verbose: bool = False
     ):
-        """
+        '''
         Update a user's role.
 
-        >>> import mlil
-        >>> client = mlil.MLILClient()
+        >>> from mlinsightlab import MLILClient
+        >>> client = MLILClient()
         >>> client.update_user_role()
 
         Parameters
@@ -421,12 +482,12 @@ class MLILClient:
         url: str
             String containing the URL of your deployment of the platform.
         creds: dict
-            Dictionary that must contain keys "username" and "key", and associated values.
+            Dictionary that must contain keys 'username' and 'key', and associated values.
         username: str
             The user's display name and login credential
         new_role: str
             New role to attribute to the specified user
-        """
+        '''
         if url is None:
             url = self.url
         if creds is None:
@@ -450,11 +511,11 @@ class MLILClient:
         creds: dict = None,
         verbose: bool = False
     ):
-        """
+        '''
         Update a user's role.
 
-        >>> import mlil
-        >>> client = mlil.MLILClient()
+        >>> from mlinsightlab import MLILClient
+        >>> client = MLILClient()
         >>> client.create_user()
 
         Parameters
@@ -462,8 +523,8 @@ class MLILClient:
         url: str
             String containing the URL of your deployment of the platform.
         creds: dict
-            Dictionary that must contain keys "username" and "key", and associated values.
-        """
+            Dictionary that must contain keys 'username' and 'key', and associated values.
+        '''
         if url is None:
             url = self.url
         if creds is None:
@@ -480,11 +541,11 @@ class MLILClient:
 
         return resp.json()
 
-    """
+    '''
     ###########################################################################
     ########################## Key Operations ################################
     ###########################################################################
-    """
+    '''
 
     def issue_api_key(
         self,
@@ -495,7 +556,7 @@ class MLILClient:
         overwrite_api_key: bool = True,
         verbose: bool = False
     ):
-        """
+        '''
         Create a new API key for a user.
 
         Parameters
@@ -508,7 +569,7 @@ class MLILClient:
             Password for user verification.
         overwrite_api_key: bool = True
             Overwrites the API key stored in the credentials cached in config.js
-        """
+        '''
         if url is None:
             url = self.url
         if username is None:
@@ -533,11 +594,11 @@ class MLILClient:
                     f'Something went wrong, request returned a status code {resp.status_code}')
         return resp
 
-    """
+    '''
     ###########################################################################
     ########################## Model Operations ###############################
     ###########################################################################
-    """
+    '''
 
     def load_model(
         self,
@@ -551,11 +612,11 @@ class MLILClient:
         verbose: bool = False,
         **kwargs
     ):
-        """
+        '''
         Loads a saved model into memory within the platform.
 
-        >>> import mlil
-        >>> client = mlil.MLILClient()
+        >>> from mlinsightlab import MLILClient
+        >>> client = MLILClient()
         >>> client.load_model(model_name, model_flavor, model_version_or_alias)
 
         Parameters
@@ -579,8 +640,8 @@ class MLILClient:
         url: str
             String containing the URL of your deployment of the platform.
         creds:
-            Dictionary that must contain keys "username" and "key", and associated values.
-        """
+            Dictionary that must contain keys 'username' and 'key', and associated values.
+        '''
 
         if url is None:
             url = self.url
@@ -589,11 +650,11 @@ class MLILClient:
 
         load_request = {}
         if requirements:
-            load_request["requirements"] = requirements
+            load_request['requirements'] = requirements
         if quantization_kwargs:
-            load_request["quantization_kwargs"] = quantization_kwargs
+            load_request['quantization_kwargs'] = quantization_kwargs
         if kwargs:
-            load_request["kwargs"] = kwargs
+            load_request['kwargs'] = kwargs
 
         resp = _load_model(url,
                            creds,
@@ -619,11 +680,11 @@ class MLILClient:
         creds: dict = None,
         verbose: bool = False
     ):
-        """
+        '''
         Lists all *loaded* models. To view unloaded models, check the MLFlow UI.
 
-        >>> import mlil
-        >>> client = mlil.MLILClient()
+        >>> from mlinsightlab import MLILClient
+        >>> client = MLILClient()
         >>> client.create_user()
 
         Parameters
@@ -631,8 +692,8 @@ class MLILClient:
         url: str
             String containing the URL of your deployment of the platform.
         creds:
-            Dictionary that must contain keys "username" and "key", and associated values.
-        """
+            Dictionary that must contain keys 'username' and 'key', and associated values.
+        '''
 
         if url is None:
             url = self.url
@@ -659,11 +720,11 @@ class MLILClient:
         creds: dict = None,
         verbose: bool = False
     ):
-        """
+        '''
         Removes a loaded model from memory.
 
-        >>> import mlil
-        >>> client = mlil.MLILClient()
+        >>> from mlinsightlab import MLILClient
+        >>> client = MLILClient()
         >>> client.unload_model()
 
         Parameters
@@ -671,7 +732,7 @@ class MLILClient:
         url: str
             String containing the URL of your deployment of the platform.
         creds:
-            Dictionary that must contain keys "username" and "key", and associated values.
+            Dictionary that must contain keys 'username' and 'key', and associated values.
         model_name: str
             The name of the model to unload.
         model_flavor: str
@@ -682,7 +743,7 @@ class MLILClient:
                 4. 'hfhub'
         model_version_or_alias: str
             The version of the model that you wish to unload (from MLFlow).
-        """
+        '''
 
         if url is None:
             url = self.url
@@ -712,7 +773,7 @@ class MLILClient:
         model_flavor: str,
         model_version_or_alias: str,
         data: Union[str, List[str]],
-        predict_function: str = "predict",
+        predict_function: str = 'predict',
         dtype: str = None,
         params: Optional[dict] = None,
         convert_to_numpy: bool = True,
@@ -720,11 +781,11 @@ class MLILClient:
         creds: dict = None,
         verbose: bool = False
     ):
-        """
+        '''
         Calls the 'predict' function of the specified MLFlow model.
 
-        >>> import mlil
-        >>> client = mlil.MLILClient()
+        >>> from mlinsightlab import MLILClient
+        >>> client = MLILClient()
         >>> client.predict()
 
         Parameters
@@ -732,7 +793,7 @@ class MLILClient:
         url: str
             String containing the URL of your deployment of the platform.
         creds:
-            Dictionary that must contain keys "username" and "key", and associated values.
+            Dictionary that must contain keys 'username' and 'key', and associated values.
         model_name: str
             The name of the model to be invoked.
         model_flavor: str
@@ -746,14 +807,14 @@ class MLILClient:
         data: Union[str, List[str]]
             The input data for prediction. Can be a single string or a list of strings.
         predict_function: str, optional
-            The name of the prediction function to call. Default is "predict".
+            The name of the prediction function to call. Default is 'predict'.
         dtype: str, optional (default None)
             The data type of the input.
         params: dict, optional
             Additional parameters for the prediction.
         convert_to_numpy: bool = True
             Whether to convert the data to a NumPy array.
-        """
+        '''
         if url is None:
             url = self.url
         if creds is None:
@@ -780,11 +841,11 @@ class MLILClient:
                     f'Something went wrong, request returned a status code {resp.status_code}')
 
         return resp.json()
-    """
+    '''
     ###########################################################################
     ########################## Admin Operations ################################
     ###########################################################################
-    """
+    '''
 
     def reset_deployment_server(
         self,
@@ -793,10 +854,10 @@ class MLILClient:
         creds: dict = None,
         verbose: bool = False
     ):
-        """
-        Resets the MLIL platform to "factory" settings. Only do this IF YOU ARE SURE YOU WANT / NEED TO.
-        >>> import mlil
-        >>> client = mlil.MLILClient()
+        '''
+        Resets the MLIL platform to 'factory' settings. Only do this IF YOU ARE SURE YOU WANT / NEED TO.
+        >>> from mlinsightlab import MLILClient
+        >>> client = MLILClient()
         >>> client.reset_deployment_server()
 
         Parameters
@@ -807,8 +868,8 @@ class MLILClient:
         url: str
             String containing the URL of your deployment of the platform.
         creds: dict = None
-            Dictionary that must contain keys "username" and "key", and associated values.
-        """
+            Dictionary that must contain keys 'username' and 'key', and associated values.
+        '''
 
         if url is None:
             url = self.url
@@ -819,7 +880,7 @@ class MLILClient:
             really_reset = True
         else:
             really_reset = input(
-                "Are you sure you want to restart the deployment server? This cannot be undone. (y/n): ").lower() == 'y'
+                'Are you sure you want to restart the deployment server? This cannot be undone. (y/n): ').lower() == 'y'
         if really_reset:
             resp = _reset_platform(url=url, creds=creds)
 
@@ -838,16 +899,16 @@ class MLILClient:
         creds: dict = None,
         verbose: bool = False
     ):
-        """
+        '''
         Resets the Jupyter service within the platform
-        >>> import mlil
-        >>> client = mlil.MLILClient()
+        >>> from mlinsightlab import MLILClient
+        >>> client = MLILClient()
         >>> client.restart_jupyter()
 
         Parameters
         ----------
         This function takes no parameters.
-        """
+        '''
 
         if url is None:
             url = self.url
@@ -873,16 +934,16 @@ class MLILClient:
         creds: dict = None,
         verbose: bool = False
     ):
-        """
+        '''
         Get system resource usage, in terms of free CPU and GPU memory (if GPU-enabled).
-        >>> import mlil
-        >>> client = mlil.MLILClient()
+        >>> from mlinsightlab import MLILClient
+        >>> client = MLILClient()
         >>> client.get_resource_usage()
 
         Parameters
         ----------
         This function takes no parameters.
-        """
+        '''
 
         if url is None:
             url = self.url
@@ -899,11 +960,11 @@ class MLILClient:
                 print(
                     f'Something went wrong, request returned a status code {resp.status_code}')
         return resp
-    """
+    '''
     ###########################################################################
     ########################## Data Operations ################################
     ###########################################################################
-    """
+    '''
 
     def list_data(
         self,
@@ -912,17 +973,17 @@ class MLILClient:
         creds: dict = None,
         verbose: bool = False
     ):
-        """
+        '''
         Lists all available data in the MLIL variable store
 
-        >>> import mlil
-        >>> client = mlil.MLILClient()
+        >>> from mlinsightlab import MLILClient
+        >>> client = MLILClient()
         >>> client.list_data()
 
         Parameters
         ----------
         directory: str
-        """
+        '''
 
         if url is None:
             url = self.url
@@ -953,11 +1014,11 @@ class MLILClient:
         url: str = None,
         creds: dict = None
     ):
-        """
+        '''
         Uploads a file to the MLIL data store.
 
-        >>> import mlil
-        >>> client = mlil.MLILClient()
+        >>> from mlinsightlab import MLILClient
+        >>> client = MLILClient()
         >>> client.upload_data()
 
         Parameters
@@ -969,7 +1030,7 @@ class MLILClient:
         overwrite: bool = False
             Whether or not to delete any files called <filename> that
             currently exist in MLIL. Defaults to False.
-        """
+        '''
 
         if url is None:
             url = self.url
@@ -1001,11 +1062,11 @@ class MLILClient:
         url: str = None,
         creds: dict = None
     ):
-        """
+        '''
         Downloads a file from the MLIL data store.
 
-        >>> import mlil
-        >>> client = mlil.MLILClient()
+        >>> from mlinsightlab import MLILClient
+        >>> client = MLILClient()
         >>> client.download_data()
 
         Parameters
@@ -1014,7 +1075,7 @@ class MLILClient:
             The name of the file in the MLIL datastore you wish to download.
         output_file_name: str
             The name of the file to write out to
-        """
+        '''
 
         if url is None:
             url = self.url
@@ -1044,11 +1105,11 @@ class MLILClient:
         url: str = None,
         creds: dict = None
     ):
-        """
+        '''
         Fetches a variable from the MLIL data store.
 
-        >>> import mlil
-        >>> client = mlil.MLILClient()
+        >>> from mlinsightlab import MLILClient
+        >>> client = MLILClient()
         >>> client.get_variable()
 
         Parameters
@@ -1057,7 +1118,7 @@ class MLILClient:
             The path of the file to be uploaded.
         variable_name: str
             The name of the variable you wish to access.
-        """
+        '''
 
         if url is None:
             url = self.url
@@ -1085,17 +1146,17 @@ class MLILClient:
         creds: dict = None,
         verbose: bool = False
     ):
-        """
+        '''
         Lists all available variables in the MLIL variable store
 
-        >>> import mlil
-        >>> client = mlil.MLILClient()
+        >>> from mlinsightlab import MLILClient
+        >>> client = MLILClient()
         >>> client.list_variables()
 
         Parameters
         ----------
         This function takes no input parameters.
-        """
+        '''
 
         if url is None:
             url = self.url
@@ -1125,11 +1186,11 @@ class MLILClient:
         url: str = None,
         creds: dict = None
     ):
-        """
+        '''
         Creates a new variable in the MLIL variable store.
 
-        >>> import mlil
-        >>> client = mlil.MLILClient()
+        >>> from mlinsightlab import MLILClient
+        >>> client = MLILClient()
         >>> client.set_variable()
 
         Parameters
@@ -1141,7 +1202,7 @@ class MLILClient:
         overwrite: bool = False
             Whether or not to delete any variables called <variable_name> that
             currently exist in MLIL. Defaults to False.
-        """
+        '''
 
         if url is None:
             url = self.url
@@ -1172,11 +1233,11 @@ class MLILClient:
         url: str = None,
         creds: dict = None
     ):
-        """
+        '''
         Creates a new variable in the MLIL variable store.
 
-        >>> import mlil
-        >>> client = mlil.MLILClient()
+        >>> from mlinsightlab import MLILClient
+        >>> client = MLILClient()
         >>> client.delete_variable()
 
         Parameters
@@ -1188,7 +1249,7 @@ class MLILClient:
         overwrite: bool = False
             Whether or not to delete any variables called <variable_name> that
             currently exist in MLIL. Defaults to False.
-        """
+        '''
 
         if url is None:
             url = self.url
@@ -1219,7 +1280,7 @@ class MLILClient:
             url: str = None,
             creds: dict = None
     ):
-        """
+        '''
         Gets predictions from a deployed model
 
         >>> from mlinsightlab import MLILClient
@@ -1234,7 +1295,7 @@ class MLILClient:
             The flavor of the model to get predictions from
         model_version_or_alias: str | int
             The version or alias of the model to get predictions from
-        """
+        '''
 
         if url is None:
             url = self.url
@@ -1264,13 +1325,13 @@ class MLILClient:
             url: str = None,
             creds: dict = None
     ):
-        """
+        '''
         Lists models for which predictions are stored
 
         >>> from mlinsightlab import MLILClient
         >>> client = MLILClient()
         >>> client.list_prediction_models()
-        """
+        '''
 
         if url is None:
             url = self.url

@@ -1,4 +1,6 @@
-LOGIN_ENDPOINT = None  # TODO
+# List of endpoints in the platform
+
+LOGIN_ENDPOINT = None  # TODO - May be deleted in a future version
 VERIFY_PASSWORD_ENDPOINT = 'password/verify'
 LOAD_MODEL_ENDPOINT = 'models/load'
 LIST_MODELS_ENDPOINT = 'models/list'
