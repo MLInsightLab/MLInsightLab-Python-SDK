@@ -29,7 +29,6 @@ def _create_api_key(
     # Format the URL
     url = f'{url}/{NEW_API_KEY_ENDPOINT}/{username}'
 
-
     # Format the JSON payload
     json_data = {
         'username': username

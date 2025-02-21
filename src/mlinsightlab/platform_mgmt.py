@@ -96,7 +96,7 @@ def _get_platform_resource_usage(
             url,
             auth=(creds['username'], creds['key']),
         )
-    
+
     # If the request is not successful, raise exception, else return response
     if not resp.ok:
         raise MLILException(str(resp.json()))

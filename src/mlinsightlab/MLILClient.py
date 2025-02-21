@@ -59,7 +59,6 @@ class MLILClient:
         self.url = auth.get('url')
         self.password = auth.get('password')
 
-
         # Raise any errors as needed
         if not self.username or not self.api_key or not self.password:
             raise ValueError(
@@ -72,7 +71,6 @@ class MLILClient:
         self.creds = {'username': self.username, 'key': self.api_key}
         if cache_credentials:
             self._save_credentials(auth)
-
 
     '''
     ###########################################################################
@@ -90,13 +88,13 @@ class MLILClient:
         # Load the stored credentials if possible
         if use_cached_credentials and self.config_path.exists():
             return self._load_stored_credentials()
-        
+
         else:
 
             # Check for environment variables indicating that the user is logging in from Jupyter
             url = os.getenv('API_URL')
             confirmation = ''
-            
+
             # Ask the user if they're logging in from the platform
             if url is not None:
                 while confirmation not in ['y', 'n']:
@@ -104,7 +102,7 @@ class MLILClient:
                         'It appears you are using this client from within the platform. Is that true? [y]/n ').lower()
                     if confirmation == '':
                         confirmation = 'y'
-            
+
             # If the user is not in the Jupyter instance of the platform, then ask for the platform URL
             if confirmation == 'n':
                 url = input('Enter platform URL: ')
@@ -166,7 +164,7 @@ class MLILClient:
         with open(self.config_path, 'w') as f:
             json.dump(auth, f)
 
-    def purge_credentials(self, ask = True):
+    def purge_credentials(self, ask=True):
         '''
         Enables user to delete the file containing cached credentials.
 
@@ -187,7 +185,6 @@ class MLILClient:
                 os.remove(self.config_path)
             else:
                 print('No credentials file found.')
-
 
     '''
     ###########################################################################
@@ -274,7 +271,7 @@ class MLILClient:
             The credentials to use to authenticate with the platform. If not provided, will use client parameters
         verbose: bool (default False)
             Whether to print intermediate results
-        
+
         '''
 
         # Populate parameters from client as necessary
@@ -409,7 +406,6 @@ class MLILClient:
             print(f'Your password has been overwritten.')
             self._save_credentials(auth)
 
-
         # Log if verbose
         if verbose:
             if resp.status_code == 200:
@@ -516,7 +512,6 @@ class MLILClient:
                 print(
                     f'Something went wrong, request returned a status code {resp.status_code}')
 
-
         # Return the response
         return resp.json()
 
@@ -615,7 +610,7 @@ class MLILClient:
             else:
                 print(
                     f'Something went wrong, request returned a status code {resp.status_code}')
-        
+
         # Return the API key
         return resp.json()
 
@@ -675,7 +670,6 @@ class MLILClient:
             url = self.url
         if creds is None:
             creds = self.creds
-
 
         # Format the request
         load_request = {}
@@ -893,8 +887,7 @@ class MLILClient:
 
         # Return the response
         return resp.json()
-    
-    
+
     '''
     ###########################################################################
     ########################## Admin Operations ################################
@@ -939,11 +932,10 @@ class MLILClient:
         else:
             really_reset = input(
                 'Are you sure you want to restart the deployment server? This cannot be undone. (y/n): ').lower() == 'y'
-            
+
         # Run the reset
         if really_reset:
             resp = _reset_platform(url=url, creds=creds)
-
 
         # Log if verbose
         if verbose:
@@ -953,7 +945,7 @@ class MLILClient:
             else:
                 print(
                     f'Something went wrong, request returned a status code {resp.status_code}')
-                
+
         # Return the response
         return resp
 
@@ -1033,7 +1025,6 @@ class MLILClient:
         # Run the function
         resp = _get_platform_resource_usage(url=url, creds=creds)
 
-
         # Log if verbose
         if verbose:
             if resp.status_code == 200:
@@ -1042,10 +1033,9 @@ class MLILClient:
             else:
                 print(
                     f'Something went wrong, request returned a status code {resp.status_code}')
-                
+
         # Return the response
         return resp
-    
 
     '''
     ###########################################################################
@@ -1079,7 +1069,6 @@ class MLILClient:
             Whether to log verbosely
         '''
 
-
         # Get parameters as necessary
         if url is None:
             url = self.url
@@ -1100,7 +1089,6 @@ class MLILClient:
             else:
                 print(
                     f'Something went wrong, request returned a status code {resp.status_code}')
-
 
         # Return response
         return resp.json()
@@ -1337,13 +1325,11 @@ class MLILClient:
             currently exist in MLIL. Defaults to False.
         '''
 
-
         # Get parameters as needed
         if url is None:
             url = self.url
         if creds is None:
             creds = self.creds
-
 
         # Run the set_variable function
         resp = _set_variable(
@@ -1354,7 +1340,6 @@ class MLILClient:
             overwrite=overwrite
         )
 
-
         # Log if verbose
         if verbose:
             if resp.status_code == 200:
@@ -1362,7 +1347,6 @@ class MLILClient:
             else:
                 print(
                     f'Something went wrong, request returned a status code {resp.status_code}')
-
 
         # Return the response
         return resp.json()
@@ -1393,13 +1377,11 @@ class MLILClient:
             Whether to log verbosely
         '''
 
-
         # Get parameters as necessary
         if url is None:
             url = self.url
         if creds is None:
             creds = self.creds
-
 
         # Run the delete_variable function
         resp = _delete_variable(
@@ -1415,7 +1397,6 @@ class MLILClient:
             else:
                 print(
                     f'Something went wrong, request returned a status code {resp.status_code}')
-
 
         # Return response
         return resp.json()
@@ -1452,7 +1433,6 @@ class MLILClient:
             Whether to log verbosely
         '''
 
-
         # Get parameters as needed
         if url is None:
             url = self.url
@@ -1468,7 +1448,6 @@ class MLILClient:
             model_version_or_alias
         )
 
-
         # Log if verbose
         if verbose:
             if resp.status_code == 200:
@@ -1476,7 +1455,6 @@ class MLILClient:
             else:
                 print(
                     f'Something went wrong, request returned a status code of {resp.status_code}')
-
 
         # Return the response
         return resp.json()
@@ -1503,7 +1481,6 @@ class MLILClient:
         verbose: bool (default False)
             Whether to log verbosely
         '''
-
 
         # Get parameters as needed
         if url is None:

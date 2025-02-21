@@ -5,6 +5,9 @@ from .MLILException import MLILException
 
 
 class ModelManager:
+    '''
+    ModelManager class used to abstract away the deployment of MLflow models to dedicated containers
+    '''
 
     def __init__(
         self,
@@ -13,7 +16,7 @@ class ModelManager:
         mlflow_tracking_uri: str = 'http://mlflow:2244',
         model_port: str = '8888'
     ):
-        """
+        '''
         Parameters
         ----------
         model_image : str (default 'ghcr.io/mlinsightlab/mlinsightlab-model-container:main)'
@@ -24,7 +27,7 @@ class ModelManager:
             The tracking URI for the MLflow service on the docker network
         model_port : str (default '8888')
             The port to deploy the model to on the container
-        """
+        '''
 
         # Create docker container client
         self.docker_client = docker.from_env()
@@ -47,7 +50,7 @@ class ModelManager:
             model_version_or_alias: str,
             use_gpu: bool = False
     ):
-        """
+        '''
         Deploy a containerized model
 
         Parameters
@@ -67,7 +70,7 @@ class ModelManager:
         -------
         success : bool
             Returns True if successful
-        """
+        '''
 
         # Environment variables for the contianer
         environment = {
@@ -121,7 +124,7 @@ class ModelManager:
             model_flavor: str,
             model_version_or_alias: str,
     ):
-        """
+        '''
         Remove a deployed model
 
         Parameters
@@ -137,7 +140,7 @@ class ModelManager:
         -------
         success : bool
             Returns True if successful
-        """
+        '''
 
         # Search for the container name
         container_name = None
@@ -169,9 +172,9 @@ class ModelManager:
         return True
 
     def remove_all_models(self):
-        """
+        '''
         Remove all models
-        """
+        '''
 
         # Go through the models and remove them all
         for model in self.models:
@@ -189,7 +192,7 @@ class ModelManager:
             model_flavor: str,
             model_version_or_alias: str
     ):
-        """
+        '''
         Get the status of a deployed model
 
         Parameters
@@ -205,7 +208,7 @@ class ModelManager:
         -------
         status : str
             The status of the model container
-        """
+        '''
 
         # Search for the container name
         container_name = None
@@ -227,7 +230,7 @@ class ModelManager:
             model_flavor: str,
             model_version_or_alias: str
     ):
-        """
+        '''
         Get the logs of a deployed model
 
         Parameters
@@ -243,7 +246,7 @@ class ModelManager:
         -------
         logs : str
             The logs of the model container
-        """
+        '''
 
         # Search for the container name
         container_name = None
