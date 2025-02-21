@@ -71,9 +71,6 @@
   <h1>Source code for mlinsightlab.MLILClient</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">warnings</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">requests</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">getpass</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
@@ -91,25 +88,25 @@
 <div class="viewcode-block" id="MLILClient">
 <a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.MLILClient.MLILClient">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">MLILClient</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Client for interacting with the ML Insights Lab (MLIL) Platform</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Client for interacting with the ML Insight Lab (MLIL) Platform</span>
+<span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">use_cached_credentials</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">auth</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">cache_credentials</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">auth</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">cache_credentials</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Initializes the class and sets configuration variables.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        use_cached_credentials: bool = False</span>
+<span class="sd">        use_cached_credentials: bool (default True)</span>
 <span class="sd">            Login using credentials that have been previosuly cached on your system.</span>
 <span class="sd">            Bypasses the interactive login flow.</span>
-<span class="sd">        auth: dict = None</span>
+<span class="sd">        auth: dict or None (default None)</span>
 <span class="sd">            Dictionary of credentials to use for the instantiated client.</span>
 <span class="sd">            Must be of structure:</span>
 <span class="sd">            {</span>
@@ -118,168 +115,206 @@
 <span class="sd">                &#39;password&#39;:your user password,</span>
 <span class="sd">                &#39;url&#39;:the base URL of your platform</span>
 <span class="sd">            }</span>
-<span class="sd">        cache_credentials: bool = False</span>
+<span class="sd">        cache_credentials: bool = True</span>
 <span class="sd">            If you provided an auth dictionary, whether you would like to cache those credentials for future use.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        &#39;&#39;&#39;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">config_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">((</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span><span class="si">}</span><span class="s2">/.mlil/config.json&quot;</span><span class="p">))</span>
+        <span class="c1"># Configuration path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">((</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span><span class="si">}</span><span class="s1">/.mlil/config.json&#39;</span><span class="p">))</span>
 
+        <span class="c1"># Try to log in using cached credentials as directed</span>
         <span class="k">if</span> <span class="n">auth</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">auth</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_login</span><span class="p">(</span><span class="n">use_cached_credentials</span><span class="o">=</span><span class="n">use_cached_credentials</span><span class="p">)</span>
 
+        <span class="c1"># Get the authentication information from the auth credentials</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="n">auth</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;username&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">api_key</span> <span class="o">=</span> <span class="n">auth</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;key&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">url</span> <span class="o">=</span> <span class="n">auth</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;url&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="n">auth</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;password&#39;</span><span class="p">)</span>
 
+        <span class="c1"># Raise any errors as needed</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_key</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;You must provide your username, password, and API key.&quot;</span><span class="p">)</span>
-
+                <span class="s1">&#39;You must provide your username, password, and API key.&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;You must provide the base URL of your instance of the platform.&quot;</span><span class="p">)</span>
+                <span class="s1">&#39;You must provide the base URL of your instance of the platform.&#39;</span><span class="p">)</span>
 
+        <span class="c1"># Set and save credentials as directed</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">creds</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;username&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="s1">&#39;key&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_key</span><span class="p">}</span>
-
         <span class="k">if</span> <span class="n">cache_credentials</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_save_credentials</span><span class="p">(</span><span class="n">auth</span><span class="p">)</span>
 
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    ###########################################################################</span>
 <span class="sd">    ########################## Login Operations ################################</span>
 <span class="sd">    ###########################################################################</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_login</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_cached_credentials</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Authenticates user.</span>
 
 <span class="sd">        Not meant to be called by the user directly.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># Load the stored credentials if possible</span>
         <span class="k">if</span> <span class="n">use_cached_credentials</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load_stored_credentials</span><span class="p">()</span>
+
         <span class="k">else</span><span class="p">:</span>
 
             <span class="c1"># Check for environment variables indicating that the user is logging in from Jupyter</span>
             <span class="n">url</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;API_URL&#39;</span><span class="p">)</span>
             <span class="n">confirmation</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+            <span class="c1"># Ask the user if they&#39;re logging in from the platform</span>
             <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">while</span> <span class="n">confirmation</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="s1">&#39;n&#39;</span><span class="p">]:</span>
                     <span class="n">confirmation</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span>
                         <span class="s1">&#39;It appears you are using this client from within the platform. Is that true? [y]/n &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
                     <span class="k">if</span> <span class="n">confirmation</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
                         <span class="n">confirmation</span> <span class="o">=</span> <span class="s1">&#39;y&#39;</span>
-            <span class="k">if</span> <span class="n">confirmation</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;n&#39;</span><span class="p">]:</span>
-                <span class="n">url</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Enter platform URL: &quot;</span><span class="p">)</span>
+
+            <span class="c1"># If the user is not in the Jupyter instance of the platform, then ask for the platform URL</span>
+            <span class="k">if</span> <span class="n">confirmation</span> <span class="o">==</span> <span class="s1">&#39;n&#39;</span><span class="p">:</span>
+                <span class="n">url</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s1">&#39;Enter platform URL: &#39;</span><span class="p">)</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">url</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;api&#39;</span><span class="p">):</span>
                     <span class="n">url</span> <span class="o">+=</span> <span class="s1">&#39;/api&#39;</span>
-            <span class="n">username</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s2">&quot;Enter username: &quot;</span><span class="p">)</span>
-            <span class="n">password</span> <span class="o">=</span> <span class="n">getpass</span><span class="o">.</span><span class="n">getpass</span><span class="p">(</span><span class="s2">&quot;Enter password: &quot;</span><span class="p">)</span>
-            <span class="n">api_key</span> <span class="o">=</span> <span class="n">getpass</span><span class="o">.</span><span class="n">getpass</span><span class="p">(</span>
-                <span class="s2">&quot;Enter API key (or leave blank to generate new): &quot;</span><span class="p">)</span>
 
+            <span class="c1"># Get all other configuration parameters</span>
+            <span class="n">username</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span><span class="s1">&#39;Enter username: &#39;</span><span class="p">)</span>
+            <span class="n">password</span> <span class="o">=</span> <span class="n">getpass</span><span class="o">.</span><span class="n">getpass</span><span class="p">(</span><span class="s1">&#39;Enter password: &#39;</span><span class="p">)</span>
+            <span class="n">api_key</span> <span class="o">=</span> <span class="n">getpass</span><span class="o">.</span><span class="n">getpass</span><span class="p">(</span>
+                <span class="s1">&#39;Enter API key (or leave blank to generate new): &#39;</span><span class="p">)</span>
+
+            <span class="c1"># Generate a new API key</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">api_key</span><span class="p">:</span>
                 <span class="n">generate_new</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span>
-                    <span class="s2">&quot;Generate new API key? [y]/n &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">]</span>
+                    <span class="s1">&#39;Generate new API key? [y]/n &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;y&#39;</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">generate_new</span><span class="p">:</span>
                     <span class="n">api_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">issue_api_key</span><span class="p">(</span>
                         <span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="n">password</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">)</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
 
+            <span class="c1"># Verify the password</span>
             <span class="n">resp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">verify_password</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">creds</span><span class="o">=</span><span class="p">{</span>
-                                        <span class="s2">&quot;username&quot;</span><span class="p">:</span> <span class="n">username</span><span class="p">,</span> <span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="n">api_key</span><span class="p">},</span> <span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="n">password</span><span class="p">)</span>
+                                        <span class="s1">&#39;username&#39;</span><span class="p">:</span> <span class="n">username</span><span class="p">,</span> <span class="s1">&#39;key&#39;</span><span class="p">:</span> <span class="n">api_key</span><span class="p">},</span> <span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="n">password</span><span class="p">)</span>
 
+            <span class="c1"># Verify that the response is okay, raise exception otherwise</span>
             <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;User verified. Welcome </span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s2">!&quot;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;User verified. Welcome </span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s1">!&#39;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;User not verified.&#39;</span><span class="p">)</span>
                 <span class="k">raise</span> <span class="n">MLILException</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()))</span>
 
+            <span class="c1"># Return authentication information</span>
             <span class="n">auth</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;username&#39;</span><span class="p">:</span> <span class="n">username</span><span class="p">,</span> <span class="s1">&#39;key&#39;</span><span class="p">:</span> <span class="n">api_key</span><span class="p">,</span>
                     <span class="s1">&#39;url&#39;</span><span class="p">:</span> <span class="n">url</span><span class="p">,</span> <span class="s1">&#39;password&#39;</span><span class="p">:</span> <span class="n">password</span><span class="p">}</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_save_credentials</span><span class="p">(</span><span class="n">auth</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">auth</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_load_stored_credentials</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Loads stored credentials from the config file.</span>
 
 <span class="sd">        This function is not meant to be called by the user directly.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># Open and load the file</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_save_credentials</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">auth</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Saves credentials to the config file.</span>
 
 <span class="sd">        This function is not meant to be called by the user directly.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># Create all subdirectories for the file as needed</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Write the file</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">auth</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
 
 <div class="viewcode-block" id="MLILClient.purge_credentials">
 <a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.MLILClient.MLILClient.purge_credentials">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">purge_credentials</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">purge_credentials</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ask</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Enables user to delete the file containing cached credentials.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">purge_creds</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span>
-            <span class="s2">&quot;Are you sure you want to delete your saved credentials? This cannot be undone. (y/n): &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;y&#39;</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ask : bool (default True)</span>
+<span class="sd">            Whether to ask for confirmation</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="k">if</span> <span class="n">ask</span><span class="p">:</span>
+            <span class="n">purge_creds</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span>
+                <span class="s1">&#39;Are you sure you want to delete your saved credentials? This cannot be undone. (y/n): &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;y&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">purge_creds</span> <span class="o">=</span> <span class="kc">True</span>
+
         <span class="k">if</span> <span class="n">purge_creds</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_path</span><span class="p">):</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">config_path</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;No credentials file found.&quot;</span><span class="p">)</span></div>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No credentials file found.&#39;</span><span class="p">)</span></div>
 
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    ###########################################################################</span>
 <span class="sd">    ########################## User Operations ################################</span>
 <span class="sd">    ###########################################################################</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
 
 <div class="viewcode-block" id="MLILClient.create_user">
 <a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.MLILClient.MLILClient.create_user">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">create_user</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">role</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">password</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">username</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">role</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">password</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">api_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">creds</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Create a user within the platform.</span>
 
-<span class="sd">        &gt;&gt;&gt; import mlil</span>
-<span class="sd">        &gt;&gt;&gt; client = mlil.MLILClient()</span>
-<span class="sd">        &gt;&gt;&gt; client.create_user()</span>
+<span class="sd">        &gt;&gt;&gt; from mlinsightlab import MLILClient</span>
+<span class="sd">        &gt;&gt;&gt; client = MLILClient()</span>
+<span class="sd">        &gt;&gt;&gt; client.create_user(&#39;username&#39;)</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        url: str</span>
-<span class="sd">            String containing the URL of your deployment of the platform.</span>
-<span class="sd">        creds:</span>
-<span class="sd">            Dictionary that must contain keys &quot;username&quot; and &quot;key&quot;, and associated values.</span>
 <span class="sd">        username: str</span>
-<span class="sd">            The user&#39;s display name and login credential</span>
+<span class="sd">            The username of the user</span>
 <span class="sd">        role: str</span>
-<span class="sd">            The role to be given to the user</span>
-<span class="sd">        api_key: str or NULL</span>
-<span class="sd">            An API key for the new user</span>
-<span class="sd">        password: str or NULL</span>
-<span class="sd">            Password for user login</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">            The role of the user</span>
+<span class="sd">        password: str</span>
+<span class="sd">            The password for the user. If not provided, will be generated</span>
+<span class="sd">        api_key: str or None (default None)</span>
+<span class="sd">            The API key for the user. If not provided, will be generated</span>
+<span class="sd">        url: str or None (default None)</span>
+<span class="sd">            The URL for the platform. If not provided, will use client parameters</span>
+<span class="sd">        creds: dict or None (default None)</span>
+<span class="sd">            The credentials to use to authenticate with the platform. If not provided, will use client parameters</span>
+<span class="sd">        verbose: bool (default False)</span>
+<span class="sd">            Whether to print intermediate results</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># Get parameters as necessary from the client</span>
         <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span>
         <span class="k">if</span> <span class="n">creds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">creds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">creds</span>
 
+        <span class="c1"># Create user</span>
         <span class="n">resp</span> <span class="o">=</span> <span class="n">_create_user</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">creds</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">role</span><span class="p">,</span> <span class="n">api_key</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
 
+        <span class="c1"># Log if verbose</span>
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;user </span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s1"> is now on the platform! Go say hi!&#39;</span><span class="p">)</span>
@@ -287,6 +322,7 @@
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;Something went wrong, request returned a status code </span><span class="si">{</span><span class="n">resp</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
+        <span class="c1"># Return the response</span>
         <span class="k">return</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span></div>
 
 
@@ -299,29 +335,36 @@
         <span class="n">creds</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Delete a user of the platform.</span>
 
-<span class="sd">        &gt;&gt;&gt; import mlil</span>
-<span class="sd">        &gt;&gt;&gt; client = mlil.MLILClient()</span>
-<span class="sd">        &gt;&gt;&gt; client.delete_user()</span>
+<span class="sd">        &gt;&gt;&gt; from mlinsightlab import MLILClient</span>
+<span class="sd">        &gt;&gt;&gt; client = MLILClient()</span>
+<span class="sd">        &gt;&gt;&gt; client.delete_user(&#39;username&#39;)</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        url: str</span>
-<span class="sd">            String containing the URL of your deployment of the platform.</span>
-<span class="sd">        creds:</span>
-<span class="sd">            Dictionary that must contain keys &quot;username&quot; and &quot;key&quot;, and associated values.</span>
 <span class="sd">        username: str</span>
-<span class="sd">            The display name of the user to be deleted.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">            The username of the user to delete</span>
+<span class="sd">        url: str or None (default None)</span>
+<span class="sd">            The URL for the platform. If not provided, will use client parameters</span>
+<span class="sd">        creds: dict or None (default None)</span>
+<span class="sd">            The credentials to use to authenticate with the platform. If not provided, will use client parameters</span>
+<span class="sd">        verbose: bool (default False)</span>
+<span class="sd">            Whether to print intermediate results</span>
+
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># Populate parameters from client as necessary</span>
         <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span>
         <span class="k">if</span> <span class="n">creds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">creds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">creds</span>
 
+        <span class="c1"># Run the delete user function</span>
         <span class="n">resp</span> <span class="o">=</span> <span class="n">_delete_user</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">creds</span><span class="p">,</span> <span class="n">username</span><span class="p">)</span>
 
+        <span class="c1"># Print as needed for verbosity requested</span>
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
@@ -330,6 +373,7 @@
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;Something went wrong, request returned a status code </span><span class="si">{</span><span class="n">resp</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
+        <span class="c1"># Return the response</span>
         <span class="k">return</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span></div>
 
 
@@ -343,24 +387,26 @@
         <span class="n">username</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Verify a user&#39;s password.</span>
 
-<span class="sd">        &gt;&gt;&gt; import mlil</span>
-<span class="sd">        &gt;&gt;&gt; client = mlil.MLILClient()</span>
-<span class="sd">        &gt;&gt;&gt; client.verify_password()</span>
+<span class="sd">        &gt;&gt;&gt; from mlinsightlab import MLILClient</span>
+<span class="sd">        &gt;&gt;&gt; client = MLILClient()</span>
+<span class="sd">        &gt;&gt;&gt; client.verify_password(&#39;my_password&#39;)</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        url: str</span>
-<span class="sd">            String containing the URL of your deployment of the platform.</span>
-<span class="sd">        creds:</span>
-<span class="sd">            Dictionary that must contain keys &quot;username&quot; and &quot;key&quot;, and associated values.</span>
-<span class="sd">        username: str</span>
-<span class="sd">            The user&#39;s display name and login credential</span>
 <span class="sd">        password: str</span>
-<span class="sd">            Password for user login.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">            The password to verify</span>
+<span class="sd">        url: str or None (default None)</span>
+<span class="sd">            The URL for the platform. If not provided, will use client parameters</span>
+<span class="sd">        creds: dict or None (default None)</span>
+<span class="sd">            The credentials to use to authenticate with the platform. If not provided, will use client parameters</span>
+<span class="sd">        verbose: bool (default False)</span>
+<span class="sd">            Whether to print intermediate results</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># Use parameters from the client as necessary</span>
         <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span>
         <span class="k">if</span> <span class="n">creds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -368,8 +414,10 @@
         <span class="k">if</span> <span class="n">username</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">username</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">username</span>
 
+        <span class="c1"># Run the verify password function</span>
         <span class="n">resp</span> <span class="o">=</span> <span class="n">_verify_password</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">creds</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="p">)</span>
 
+        <span class="c1"># Print results if verbosity requested</span>
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
@@ -378,7 +426,8 @@
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;Something went wrong, request returned a status code </span><span class="si">{</span><span class="n">resp</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">resp</span></div>
+        <span class="c1"># Return True if correct</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
 
 
 <div class="viewcode-block" id="MLILClient.issue_new_password">
@@ -386,37 +435,40 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">issue_new_password</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">new_password</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">username</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">overwrite_password</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">creds</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">username</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Create a new a password for an existing user.</span>
 
-<span class="sd">        &gt;&gt;&gt; import mlil</span>
-<span class="sd">        &gt;&gt;&gt; client = mlil.MLILClient()</span>
-<span class="sd">        &gt;&gt;&gt; client.issue_new_password()</span>
+<span class="sd">        &gt;&gt;&gt; from mlinsightlab import MLILClient</span>
+<span class="sd">        &gt;&gt;&gt; client = MLILClient()</span>
+<span class="sd">        &gt;&gt;&gt; client.issue_new_password(&#39;new_password&#39;)</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-
 <span class="sd">        new_password: str</span>
 <span class="sd">            New password for user authentication.</span>
 <span class="sd">            It must have:</span>
 <span class="sd">            - At least 8 characters</span>
 <span class="sd">            - At least 1 uppercase character</span>
 <span class="sd">            - At least 1 lowercase character</span>
-<span class="sd">        overwrite_password: bool = True</span>
-<span class="sd">            Whether or not to overwrite the password in the config file. Defaults to True.</span>
-<span class="sd">        url: str</span>
-<span class="sd">            String containing the URL of your deployment of the platform.</span>
-<span class="sd">        creds:</span>
-<span class="sd">            Dictionary that must contain keys &quot;username&quot; and &quot;key&quot;, and associated values.</span>
-<span class="sd">        username: str</span>
+<span class="sd">        username: str or None (default None)</span>
 <span class="sd">            The user&#39;s display name and login credential</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        overwrite_password: bool (default True)</span>
+<span class="sd">            Whether or not to overwrite the password in the config file.</span>
+<span class="sd">        url: str or None (default None)</span>
+<span class="sd">            String containing the URL of your deployment of the platform.</span>
+<span class="sd">        creds: dict or None (default None)</span>
+<span class="sd">            Dictionary that must contain keys &#39;username&#39; and &#39;key&#39;, and associated values.</span>
+<span class="sd">        verbose: bool (default False)</span>
+<span class="sd">            Whether to log verbosely</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># Get parameters as necessary from client</span>
         <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span>
         <span class="k">if</span> <span class="n">creds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -424,20 +476,24 @@
         <span class="k">if</span> <span class="n">username</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">username</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">username</span>
 
+        <span class="c1"># Run the issue new password function</span>
         <span class="n">resp</span> <span class="o">=</span> <span class="n">_issue_new_password</span><span class="p">(</span>
             <span class="n">url</span><span class="p">,</span> <span class="n">creds</span><span class="p">,</span> <span class="n">username</span><span class="p">,</span> <span class="n">new_password</span><span class="o">=</span><span class="n">new_password</span><span class="p">)</span>
 
+        <span class="c1"># Set new password for client</span>
         <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">ok</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="n">new_password</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">MLILException</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()))</span>
 
+        <span class="c1"># If overwrite, save the password</span>
         <span class="k">if</span> <span class="n">overwrite_password</span><span class="p">:</span>
             <span class="n">auth</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;username&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="s1">&#39;key&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_key</span><span class="p">,</span>
                     <span class="s1">&#39;url&#39;</span><span class="p">:</span> <span class="n">url</span><span class="p">,</span> <span class="s1">&#39;password&#39;</span><span class="p">:</span> <span class="n">new_password</span><span class="p">}</span>
             <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Your password has been overwritten.&#39;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_save_credentials</span><span class="p">(</span><span class="n">auth</span><span class="p">)</span>
 
+        <span class="c1"># Log if verbose</span>
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
@@ -446,6 +502,7 @@
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;Something went wrong, request returned a status code </span><span class="si">{</span><span class="n">resp</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
+        <span class="c1"># Return the response</span>
         <span class="k">return</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span></div>
 
 
@@ -458,29 +515,35 @@
         <span class="n">creds</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Check a user&#39;s role.</span>
 
-<span class="sd">        &gt;&gt;&gt; import mlil</span>
-<span class="sd">        &gt;&gt;&gt; client = mlil.MLILClient()</span>
-<span class="sd">        &gt;&gt;&gt; client.get_user_role()</span>
+<span class="sd">        &gt;&gt;&gt; from mlinsightlab import MLILClient</span>
+<span class="sd">        &gt;&gt;&gt; client = MLILClient()</span>
+<span class="sd">        &gt;&gt;&gt; client.get_user_role(&#39;username&#39;)</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        url: str</span>
-<span class="sd">            String containing the URL of your deployment of the platform.</span>
-<span class="sd">        creds:</span>
-<span class="sd">            Dictionary that must contain keys &quot;username&quot; and &quot;key&quot;, and associated values.</span>
 <span class="sd">        username: str</span>
-<span class="sd">            The user&#39;s display name and login credential.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">            The username of the user to get a role for</span>
+<span class="sd">        url: str or None (default None)</span>
+<span class="sd">            String containing the URL of your deployment of the platform.</span>
+<span class="sd">        creds: dict or None (default None)</span>
+<span class="sd">            Dictionary that must contain keys &#39;username&#39; and &#39;key&#39;, and associated values.</span>
+<span class="sd">        verbose: bool (default False)</span>
+<span class="sd">            Whether to log verbosely</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># Get parameters from the client as necessary</span>
         <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span>
         <span class="k">if</span> <span class="n">creds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">creds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">creds</span>
 
+        <span class="c1"># Run the get_user_role function</span>
         <span class="n">resp</span> <span class="o">=</span> <span class="n">_get_user_role</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">creds</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">)</span>
 
+        <span class="c1"># Log if verbose</span>
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
@@ -489,6 +552,7 @@
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;Something went wrong, request returned a status code </span><span class="si">{</span><span class="n">resp</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
+        <span class="c1"># Return the response</span>
         <span class="k">return</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span></div>
 
 
@@ -502,32 +566,38 @@
         <span class="n">creds</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Update a user&#39;s role.</span>
 
-<span class="sd">        &gt;&gt;&gt; import mlil</span>
-<span class="sd">        &gt;&gt;&gt; client = mlil.MLILClient()</span>
-<span class="sd">        &gt;&gt;&gt; client.update_user_role()</span>
+<span class="sd">        &gt;&gt;&gt; from mlinsightlab import MLILClient</span>
+<span class="sd">        &gt;&gt;&gt; client = MLILClient()</span>
+<span class="sd">        &gt;&gt;&gt; client.update_user_role(&#39;username&#39;, &#39;new_role&#39;)</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        url: str</span>
-<span class="sd">            String containing the URL of your deployment of the platform.</span>
-<span class="sd">        creds: dict</span>
-<span class="sd">            Dictionary that must contain keys &quot;username&quot; and &quot;key&quot;, and associated values.</span>
 <span class="sd">        username: str</span>
 <span class="sd">            The user&#39;s display name and login credential</span>
 <span class="sd">        new_role: str</span>
 <span class="sd">            New role to attribute to the specified user</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        url: str or None (default None)</span>
+<span class="sd">            String containing the URL of your deployment of the platform.</span>
+<span class="sd">        creds: dict or None (default None)</span>
+<span class="sd">            Dictionary that must contain keys &#39;username&#39; and &#39;key&#39;, and associated values.</span>
+<span class="sd">        verbose: bool (default False)</span>
+<span class="sd">            Whether to log verbosely</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># Get parameters from the client as necessary</span>
         <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span>
         <span class="k">if</span> <span class="n">creds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">creds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">creds</span>
 
+        <span class="c1"># Run the update_user_role function</span>
         <span class="n">resp</span> <span class="o">=</span> <span class="n">_update_user_role</span><span class="p">(</span>
             <span class="n">url</span><span class="p">,</span> <span class="n">creds</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span> <span class="n">new_role</span><span class="o">=</span><span class="n">new_role</span><span class="p">)</span>
 
+        <span class="c1"># Log if verbose</span>
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;User </span><span class="si">{</span><span class="n">username</span><span class="si">}</span><span class="s1"> now has the role </span><span class="si">{</span><span class="n">new_role</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
@@ -535,6 +605,7 @@
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;Something went wrong, request returned a status code </span><span class="si">{</span><span class="n">resp</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
+        <span class="c1"># Return the response</span>
         <span class="k">return</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span></div>
 
 
@@ -546,11 +617,11 @@
         <span class="n">creds</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Update a user&#39;s role.</span>
 
-<span class="sd">        &gt;&gt;&gt; import mlil</span>
-<span class="sd">        &gt;&gt;&gt; client = mlil.MLILClient()</span>
+<span class="sd">        &gt;&gt;&gt; from mlinsightlab import MLILClient</span>
+<span class="sd">        &gt;&gt;&gt; client = MLILClient()</span>
 <span class="sd">        &gt;&gt;&gt; client.create_user()</span>
 
 <span class="sd">        Parameters</span>
@@ -558,8 +629,8 @@
 <span class="sd">        url: str</span>
 <span class="sd">            String containing the URL of your deployment of the platform.</span>
 <span class="sd">        creds: dict</span>
-<span class="sd">            Dictionary that must contain keys &quot;username&quot; and &quot;key&quot;, and associated values.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">            Dictionary that must contain keys &#39;username&#39; and &#39;key&#39;, and associated values.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
         <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span>
         <span class="k">if</span> <span class="n">creds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -577,37 +648,41 @@
         <span class="k">return</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span></div>
 
 
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    ###########################################################################</span>
 <span class="sd">    ########################## Key Operations ################################</span>
 <span class="sd">    ###########################################################################</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
 
 <div class="viewcode-block" id="MLILClient.issue_api_key">
 <a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.MLILClient.MLILClient.issue_api_key">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">issue_api_key</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">username</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">password</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">username</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">password</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">creds</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">overwrite_api_key</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Create a new API key for a user.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        url: str</span>
-<span class="sd">            String containing the URL of your deployment of the platform.</span>
-<span class="sd">        username: str</span>
+
+<span class="sd">        username: str or None (default None)</span>
 <span class="sd">            The display name of the user for whom you&#39;re creating a key.</span>
-<span class="sd">        password: str</span>
+<span class="sd">        password: str or None (default None)</span>
 <span class="sd">            Password for user verification.</span>
-<span class="sd">        overwrite_api_key: bool = True</span>
+<span class="sd">        url: str or None (default None)</span>
+<span class="sd">            String containing the URL of your deployment of the platform.</span>
+<span class="sd">        overwrite_api_key: bool (default True)</span>
 <span class="sd">            Overwrites the API key stored in the credentials cached in config.js</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        verbose: bool (default False)</span>
+<span class="sd">            Whether to log verbosely</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># Get parameters from client as necessary</span>
         <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span>
         <span class="k">if</span> <span class="n">username</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -615,29 +690,35 @@
         <span class="k">if</span> <span class="n">password</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">password</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">password</span>
 
+        <span class="c1"># Run the create_api_key function</span>
         <span class="n">resp</span> <span class="o">=</span> <span class="n">_create_api_key</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="n">password</span><span class="p">)</span>
 
+        <span class="c1"># Assign the API key to client</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">api_key</span> <span class="o">=</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
 
+        <span class="c1"># Overwrite the saved credentials if requested</span>
         <span class="k">if</span> <span class="n">overwrite_api_key</span><span class="p">:</span>
             <span class="n">auth</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;username&#39;</span><span class="p">:</span> <span class="n">username</span><span class="p">,</span> <span class="s1">&#39;key&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_key</span><span class="p">,</span>
                     <span class="s1">&#39;url&#39;</span><span class="p">:</span> <span class="n">url</span><span class="p">,</span> <span class="s1">&#39;password&#39;</span><span class="p">:</span> <span class="n">password</span><span class="p">}</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_save_credentials</span><span class="p">(</span><span class="n">auth</span><span class="p">)</span>
 
+        <span class="c1"># Log if verbose</span>
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;New key granted. Please only use this power for good.&#39;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;Something went wrong, request returned a status code </span><span class="si">{</span><span class="n">resp</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">resp</span></div>
+
+        <span class="c1"># Return the API key</span>
+        <span class="k">return</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span></div>
 
 
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    ###########################################################################</span>
 <span class="sd">    ########################## Model Operations ###############################</span>
 <span class="sd">    ###########################################################################</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
 
 <div class="viewcode-block" id="MLILClient.load_model">
 <a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.MLILClient.MLILClient.load_model">[docs]</a>
@@ -653,12 +734,12 @@
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Loads a saved model into memory within the platform.</span>
 
-<span class="sd">        &gt;&gt;&gt; import mlil</span>
-<span class="sd">        &gt;&gt;&gt; client = mlil.MLILClient()</span>
-<span class="sd">        &gt;&gt;&gt; client.load_model(model_name, model_flavor, model_version_or_alias)</span>
+<span class="sd">        &gt;&gt;&gt; from mlinsightlab import MLILClient</span>
+<span class="sd">        &gt;&gt;&gt; client = MLILClient()</span>
+<span class="sd">        &gt;&gt;&gt; client.load_model(&#39;test_model&#39;, &#39;test_model_flavor&#39;, &#39;test_model_version_or_alias&#39;)</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -672,31 +753,36 @@
 <span class="sd">                4. &#39;hfhub&#39;</span>
 <span class="sd">        model_version_or_alias: str</span>
 <span class="sd">            The version of the model that you wish to load (from MLFlow).</span>
-<span class="sd">        requirements: str = Nonw</span>
+<span class="sd">        requirements: str or None (default None)</span>
 <span class="sd">            Any pip requirements for loading the model.</span>
 <span class="sd">        quantization_kwargs : dict or None (default None)</span>
 <span class="sd">            Quantization keyword arguments. NOTE: Only applies for hfhub models</span>
+<span class="sd">        url: str or None (default None)</span>
+<span class="sd">            String containing the URL of your deployment of the platform.</span>
+<span class="sd">        creds: dict or None (default None)</span>
+<span class="sd">            Dictionary that must contain keys &#39;username&#39; and &#39;key&#39;, and associated values.</span>
+<span class="sd">        verbose: bool (default False)</span>
+<span class="sd">            Whether to log verbosely</span>
 <span class="sd">        **kwargs : additional keyword arguments</span>
 <span class="sd">            Additional keyword arguments. NOTE: Only applies to hfhub models</span>
-<span class="sd">        url: str</span>
-<span class="sd">            String containing the URL of your deployment of the platform.</span>
-<span class="sd">        creds:</span>
-<span class="sd">            Dictionary that must contain keys &quot;username&quot; and &quot;key&quot;, and associated values.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        &#39;&#39;&#39;</span>
 
+        <span class="c1"># Get parameters from client as necessary</span>
         <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span>
         <span class="k">if</span> <span class="n">creds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">creds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">creds</span>
 
+        <span class="c1"># Format the request</span>
         <span class="n">load_request</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="n">requirements</span><span class="p">:</span>
-            <span class="n">load_request</span><span class="p">[</span><span class="s2">&quot;requirements&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">requirements</span>
+            <span class="n">load_request</span><span class="p">[</span><span class="s1">&#39;requirements&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">requirements</span>
         <span class="k">if</span> <span class="n">quantization_kwargs</span><span class="p">:</span>
-            <span class="n">load_request</span><span class="p">[</span><span class="s2">&quot;quantization_kwargs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">quantization_kwargs</span>
+            <span class="n">load_request</span><span class="p">[</span><span class="s1">&#39;quantization_kwargs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">quantization_kwargs</span>
         <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span>
-            <span class="n">load_request</span><span class="p">[</span><span class="s2">&quot;kwargs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span>
+            <span class="n">load_request</span><span class="p">[</span><span class="s1">&#39;kwargs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span>
 
+        <span class="c1"># Run the load_model function</span>
         <span class="n">resp</span> <span class="o">=</span> <span class="n">_load_model</span><span class="p">(</span><span class="n">url</span><span class="p">,</span>
                            <span class="n">creds</span><span class="p">,</span>
                            <span class="n">model_name</span><span class="o">=</span><span class="n">model_name</span><span class="p">,</span>
@@ -705,6 +791,7 @@
                            <span class="n">load_request</span><span class="o">=</span><span class="n">load_request</span>
                            <span class="p">)</span>
 
+        <span class="c1"># Log if verbose</span>
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
@@ -713,7 +800,8 @@
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;Something went wrong, request returned a status code </span><span class="si">{</span><span class="n">resp</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">resp</span></div>
+        <span class="c1"># Return the response JSON</span>
+        <span class="k">return</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="MLILClient.list_models">
@@ -724,28 +812,33 @@
         <span class="n">creds</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Lists all *loaded* models. To view unloaded models, check the MLFlow UI.</span>
 
-<span class="sd">        &gt;&gt;&gt; import mlil</span>
-<span class="sd">        &gt;&gt;&gt; client = mlil.MLILClient()</span>
-<span class="sd">        &gt;&gt;&gt; client.create_user()</span>
+<span class="sd">        &gt;&gt;&gt; from mlinsightlab import MLILClient</span>
+<span class="sd">        &gt;&gt;&gt; client = MLILClient()</span>
+<span class="sd">        &gt;&gt;&gt; client.list_models()</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        url: str</span>
+<span class="sd">        url: str or None (default None)</span>
 <span class="sd">            String containing the URL of your deployment of the platform.</span>
-<span class="sd">        creds:</span>
-<span class="sd">            Dictionary that must contain keys &quot;username&quot; and &quot;key&quot;, and associated values.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        creds: dict or None (default None)</span>
+<span class="sd">            Dictionary that must contain keys &#39;username&#39; and &#39;key&#39;, and associated values.</span>
+<span class="sd">        verbose: bool (default False)</span>
+<span class="sd">            Whether to log verbosely</span>
+<span class="sd">        &#39;&#39;&#39;</span>
 
+        <span class="c1"># Get parameters from the client as necessary</span>
         <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span>
         <span class="k">if</span> <span class="n">creds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">creds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">creds</span>
 
+        <span class="c1"># Run the list_models function</span>
         <span class="n">resp</span> <span class="o">=</span> <span class="n">_list_models</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">creds</span><span class="o">=</span><span class="n">creds</span><span class="p">)</span>
 
+        <span class="c1"># Log if verbose</span>
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;These are your models, Simba, as far as the eye can see.&#39;</span><span class="p">)</span>
@@ -753,6 +846,7 @@
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;Something went wrong, request returned a status code </span><span class="si">{</span><span class="n">resp</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
+        <span class="c1"># Return the response</span>
         <span class="k">return</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span></div>
 
 
@@ -767,19 +861,15 @@
         <span class="n">creds</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Removes a loaded model from memory.</span>
 
-<span class="sd">        &gt;&gt;&gt; import mlil</span>
-<span class="sd">        &gt;&gt;&gt; client = mlil.MLILClient()</span>
-<span class="sd">        &gt;&gt;&gt; client.unload_model()</span>
+<span class="sd">        &gt;&gt;&gt; from mlinsightlab import MLILClient</span>
+<span class="sd">        &gt;&gt;&gt; client = MLILClient()</span>
+<span class="sd">        &gt;&gt;&gt; client.unload_model(&#39;test_model&#39;, &#39;test_model_flavor&#39;, &#39;test_model_version&#39;)</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        url: str</span>
-<span class="sd">            String containing the URL of your deployment of the platform.</span>
-<span class="sd">        creds:</span>
-<span class="sd">            Dictionary that must contain keys &quot;username&quot; and &quot;key&quot;, and associated values.</span>
 <span class="sd">        model_name: str</span>
 <span class="sd">            The name of the model to unload.</span>
 <span class="sd">        model_flavor: str</span>
@@ -790,13 +880,21 @@
 <span class="sd">                4. &#39;hfhub&#39;</span>
 <span class="sd">        model_version_or_alias: str</span>
 <span class="sd">            The version of the model that you wish to unload (from MLFlow).</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        url: str or None (default None)</span>
+<span class="sd">            String containing the URL of your deployment of the platform.</span>
+<span class="sd">        creds: dict or None (default None)</span>
+<span class="sd">            Dictionary that must contain keys &#39;username&#39; and &#39;key&#39;, and associated values.</span>
+<span class="sd">        verbose: bool (default False)</span>
+<span class="sd">            Whether to log verbosely</span>
+<span class="sd">        &#39;&#39;&#39;</span>
 
+        <span class="c1"># Get parameters from the client as necessary</span>
         <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span>
         <span class="k">if</span> <span class="n">creds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">creds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">creds</span>
 
+        <span class="c1"># Run the unload_model function</span>
         <span class="n">resp</span> <span class="o">=</span> <span class="n">_unload_model</span><span class="p">(</span>
             <span class="n">url</span><span class="p">,</span>
             <span class="n">creds</span><span class="p">,</span>
@@ -805,6 +903,7 @@
             <span class="n">model_version_or_alias</span><span class="o">=</span><span class="n">model_version_or_alias</span>
         <span class="p">)</span>
 
+        <span class="c1"># Log if verbose</span>
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s1"> has been unloaded from memory.&#39;</span><span class="p">)</span>
@@ -812,6 +911,7 @@
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;Something went wrong, request returned a status code </span><span class="si">{</span><span class="n">resp</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
+        <span class="c1"># Return the response</span>
         <span class="k">return</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span></div>
 
 
@@ -823,7 +923,7 @@
         <span class="n">model_flavor</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">model_version_or_alias</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
-        <span class="n">predict_function</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;predict&quot;</span><span class="p">,</span>
+        <span class="n">predict_function</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;predict&#39;</span><span class="p">,</span>
         <span class="n">dtype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">params</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">convert_to_numpy</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
@@ -831,19 +931,15 @@
         <span class="n">creds</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Calls the &#39;predict&#39; function of the specified MLFlow model.</span>
 
-<span class="sd">        &gt;&gt;&gt; import mlil</span>
-<span class="sd">        &gt;&gt;&gt; client = mlil.MLILClient()</span>
+<span class="sd">        &gt;&gt;&gt; from mlinsightlab import MLILClient</span>
+<span class="sd">        &gt;&gt;&gt; client = MLILClient()</span>
 <span class="sd">        &gt;&gt;&gt; client.predict()</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        url: str</span>
-<span class="sd">            String containing the URL of your deployment of the platform.</span>
-<span class="sd">        creds:</span>
-<span class="sd">            Dictionary that must contain keys &quot;username&quot; and &quot;key&quot;, and associated values.</span>
 <span class="sd">        model_name: str</span>
 <span class="sd">            The name of the model to be invoked.</span>
 <span class="sd">        model_flavor: str</span>
@@ -856,20 +952,29 @@
 <span class="sd">            The version of the model that you wish to invoke.</span>
 <span class="sd">        data: Union[str, List[str]]</span>
 <span class="sd">            The input data for prediction. Can be a single string or a list of strings.</span>
-<span class="sd">        predict_function: str, optional</span>
-<span class="sd">            The name of the prediction function to call. Default is &quot;predict&quot;.</span>
-<span class="sd">        dtype: str, optional (default None)</span>
+<span class="sd">        predict_function: str (default &#39;predict&#39;)</span>
+<span class="sd">            The name of the prediction function to call.</span>
+<span class="sd">        dtype: str or None (default None)</span>
 <span class="sd">            The data type of the input.</span>
-<span class="sd">        params: dict, optional</span>
+<span class="sd">        params: dict or None (default None)</span>
 <span class="sd">            Additional parameters for the prediction.</span>
-<span class="sd">        convert_to_numpy: bool = True</span>
-<span class="sd">            Whether to convert the data to a NumPy array.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        convert_to_numpy: bool (default True)</span>
+<span class="sd">            Whether to convert the data to a NumPy array server-side.</span>
+<span class="sd">        url: str or None (default None)</span>
+<span class="sd">            String containing the URL of your deployment of the platform.</span>
+<span class="sd">        creds: dict or None (default None)</span>
+<span class="sd">            Dictionary that must contain keys &#39;username&#39; and &#39;key&#39;, and associated values.</span>
+<span class="sd">        verbose: bool (default False)</span>
+<span class="sd">            Whether to log verbosely</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># Get parameters from the client as necessary</span>
         <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span>
         <span class="k">if</span> <span class="n">creds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">creds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">creds</span>
 
+        <span class="c1"># Run the predict function</span>
         <span class="n">resp</span> <span class="o">=</span> <span class="n">_predict</span><span class="p">(</span>
             <span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span>
             <span class="n">creds</span><span class="o">=</span><span class="n">creds</span><span class="p">,</span>
@@ -883,6 +988,7 @@
             <span class="n">convert_to_numpy</span><span class="o">=</span><span class="n">convert_to_numpy</span>
         <span class="p">)</span>
 
+        <span class="c1"># Log if verbose</span>
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Sometimes I think I think&#39;</span><span class="p">)</span>
@@ -890,13 +996,15 @@
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;Something went wrong, request returned a status code </span><span class="si">{</span><span class="n">resp</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
+        <span class="c1"># Return the response</span>
         <span class="k">return</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span></div>
 
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    ###########################################################################</span>
 <span class="sd">    ########################## Admin Operations ################################</span>
 <span class="sd">    ###########################################################################</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
 
 <div class="viewcode-block" id="MLILClient.reset_deployment_server">
 <a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.MLILClient.MLILClient.reset_deployment_server">[docs]</a>
@@ -907,36 +1015,43 @@
         <span class="n">creds</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Resets the MLIL platform to &quot;factory&quot; settings. Only do this IF YOU ARE SURE YOU WANT / NEED TO.</span>
-<span class="sd">        &gt;&gt;&gt; import mlil</span>
-<span class="sd">        &gt;&gt;&gt; client = mlil.MLILClient()</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Resets the MLIL deployment server. Unloads all models and restarts the server, at which point the models will be loaded again.</span>
+<span class="sd">        &gt;&gt;&gt; from mlinsightlab import MLILClient</span>
+<span class="sd">        &gt;&gt;&gt; client = MLILClient()</span>
 <span class="sd">        &gt;&gt;&gt; client.reset_deployment_server()</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        failsafe: bool = True</span>
+<span class="sd">        failsafe: bool (default True)</span>
 <span class="sd">            This is a safety catch that prompts the user to confirm before they reset the platform.</span>
 <span class="sd">            Should only be set to False if you are scripting and/or know what you are doing.</span>
-<span class="sd">        url: str</span>
+<span class="sd">        url: str or None (default None)</span>
 <span class="sd">            String containing the URL of your deployment of the platform.</span>
-<span class="sd">        creds: dict = None</span>
-<span class="sd">            Dictionary that must contain keys &quot;username&quot; and &quot;key&quot;, and associated values.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        creds: dict or None (default None)</span>
+<span class="sd">            Dictionary that must contain keys &#39;username&#39; and &#39;key&#39;, and associated values.</span>
+<span class="sd">        verbose: bool (default False)</span>
+<span class="sd">            Whether to log verbosely</span>
+<span class="sd">        &#39;&#39;&#39;</span>
 
+        <span class="c1"># Get parameters from client as needed</span>
         <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span>
         <span class="k">if</span> <span class="n">creds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">creds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">creds</span>
 
+        <span class="c1"># Check based on failsafe</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">failsafe</span><span class="p">:</span>
             <span class="n">really_reset</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">really_reset</span> <span class="o">=</span> <span class="nb">input</span><span class="p">(</span>
-                <span class="s2">&quot;Are you sure you want to restart the deployment server? This cannot be undone. (y/n): &quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;y&#39;</span>
+                <span class="s1">&#39;Are you sure you want to restart the deployment server? This cannot be undone. (y/n): &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;y&#39;</span>
+
+        <span class="c1"># Run the reset</span>
         <span class="k">if</span> <span class="n">really_reset</span><span class="p">:</span>
             <span class="n">resp</span> <span class="o">=</span> <span class="n">_reset_platform</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">creds</span><span class="o">=</span><span class="n">creds</span><span class="p">)</span>
 
+        <span class="c1"># Log if verbose</span>
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
@@ -944,7 +1059,9 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;Something went wrong, request returned a status code </span><span class="si">{</span><span class="n">resp</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">resp</span></div>
+
+        <span class="c1"># Return the response</span>
+        <span class="k">return</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="MLILClient.restart_jupyter">
@@ -955,24 +1072,32 @@
         <span class="n">creds</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Resets the Jupyter service within the platform</span>
-<span class="sd">        &gt;&gt;&gt; import mlil</span>
-<span class="sd">        &gt;&gt;&gt; client = mlil.MLILClient()</span>
+<span class="sd">        &gt;&gt;&gt; from mlinsightlab import MLILClient</span>
+<span class="sd">        &gt;&gt;&gt; client = MLILClient()</span>
 <span class="sd">        &gt;&gt;&gt; client.restart_jupyter()</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        This function takes no parameters.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        url: str or None (default None)</span>
+<span class="sd">            String containing the URL of your deployment of the platform.</span>
+<span class="sd">        creds: dict or None (default None)</span>
+<span class="sd">            Dictionary that must contain keys &#39;username&#39; and &#39;key&#39;, and associated values.</span>
+<span class="sd">        verbose: bool (default False)</span>
+<span class="sd">            Whether to log verbosely</span>
+<span class="sd">        &#39;&#39;&#39;</span>
 
+        <span class="c1"># Get parameters as needed</span>
         <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span>
         <span class="k">if</span> <span class="n">creds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">creds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">creds</span>
 
+        <span class="c1"># Run the restart function</span>
         <span class="n">resp</span> <span class="o">=</span> <span class="n">_restart_jupyter</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">creds</span><span class="o">=</span><span class="n">creds</span><span class="p">)</span>
 
+        <span class="c1"># Log if verbose</span>
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
@@ -982,7 +1107,9 @@
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;Something went wrong, request returned a status code </span><span class="si">{</span><span class="n">resp</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s1">&#39;</span>
                 <span class="p">)</span>
-        <span class="k">return</span> <span class="n">resp</span></div>
+
+        <span class="c1"># Return the response</span>
+        <span class="k">return</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="MLILClient.get_resource_usage">
@@ -993,24 +1120,32 @@
         <span class="n">creds</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Get system resource usage, in terms of free CPU and GPU memory (if GPU-enabled).</span>
-<span class="sd">        &gt;&gt;&gt; import mlil</span>
-<span class="sd">        &gt;&gt;&gt; client = mlil.MLILClient()</span>
+<span class="sd">        &gt;&gt;&gt; from mlinsightlab import MLILClient</span>
+<span class="sd">        &gt;&gt;&gt; client = MLILClient()</span>
 <span class="sd">        &gt;&gt;&gt; client.get_resource_usage()</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        This function takes no parameters.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        url: str or None (default None)</span>
+<span class="sd">            String containing the URL of your deployment of the platform.</span>
+<span class="sd">        creds: dict or None (default None)</span>
+<span class="sd">            Dictionary that must contain keys &#39;username&#39; and &#39;key&#39;, and associated values.</span>
+<span class="sd">        verbose: bool (default False)</span>
+<span class="sd">            Whether to log verbosely</span>
+<span class="sd">        &#39;&#39;&#39;</span>
 
+        <span class="c1"># Get parameters as needed</span>
         <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span>
         <span class="k">if</span> <span class="n">creds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">creds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">creds</span>
 
+        <span class="c1"># Run the function</span>
         <span class="n">resp</span> <span class="o">=</span> <span class="n">_get_platform_resource_usage</span><span class="p">(</span><span class="n">url</span><span class="o">=</span><span class="n">url</span><span class="p">,</span> <span class="n">creds</span><span class="o">=</span><span class="n">creds</span><span class="p">)</span>
 
+        <span class="c1"># Log if verbose</span>
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
@@ -1018,46 +1153,59 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;Something went wrong, request returned a status code </span><span class="si">{</span><span class="n">resp</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">resp</span></div>
 
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+        <span class="c1"># Return the response</span>
+        <span class="k">return</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span></div>
+
+
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    ###########################################################################</span>
 <span class="sd">    ########################## Data Operations ################################</span>
 <span class="sd">    ###########################################################################</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
 
 <div class="viewcode-block" id="MLILClient.list_data">
 <a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.MLILClient.MLILClient.list_data">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">list_data</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">directory</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">creds</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Lists all available data in the MLIL variable store</span>
 
-<span class="sd">        &gt;&gt;&gt; import mlil</span>
-<span class="sd">        &gt;&gt;&gt; client = mlil.MLILClient()</span>
+<span class="sd">        &gt;&gt;&gt; from mlinsightlab import MLILClient</span>
+<span class="sd">        &gt;&gt;&gt; client = MLILClient()</span>
 <span class="sd">        &gt;&gt;&gt; client.list_data()</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        directory: str</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        directory: str or None (default None)</span>
+<span class="sd">            The directory to list</span>
+<span class="sd">        url: str or None (default None)</span>
+<span class="sd">            String containing the URL of your deployment of the platform.</span>
+<span class="sd">        creds: dict or None (default None)</span>
+<span class="sd">            Dictionary that must contain keys &#39;username&#39; and &#39;key&#39;, and associated values.</span>
+<span class="sd">        verbose: bool (default False)</span>
+<span class="sd">            Whether to log verbosely</span>
+<span class="sd">        &#39;&#39;&#39;</span>
 
+        <span class="c1"># Get parameters as necessary</span>
         <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span>
         <span class="k">if</span> <span class="n">creds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">creds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">creds</span>
 
+        <span class="c1"># Run the list data function</span>
         <span class="n">resp</span> <span class="o">=</span> <span class="n">_list_data</span><span class="p">(</span>
             <span class="n">url</span><span class="p">,</span>
             <span class="n">creds</span><span class="p">,</span>
             <span class="n">directory</span>
         <span class="p">)</span>
 
+        <span class="c1"># Log if verbose</span>
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Some people say it is the new oil.&#39;</span><span class="p">)</span>
@@ -1065,6 +1213,7 @@
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;Something went wrong, request returned a status code </span><span class="si">{</span><span class="n">resp</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
+        <span class="c1"># Return response</span>
         <span class="k">return</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span></div>
 
 
@@ -1073,35 +1222,46 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">upload_data</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">file_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">creds</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">creds</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Uploads a file to the MLIL data store.</span>
 
-<span class="sd">        &gt;&gt;&gt; import mlil</span>
-<span class="sd">        &gt;&gt;&gt; client = mlil.MLILClient()</span>
+<span class="sd">        &gt;&gt;&gt; from mlinsightlab import MLILClient</span>
+<span class="sd">        &gt;&gt;&gt; client = MLILClient()</span>
 <span class="sd">        &gt;&gt;&gt; client.upload_data()</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        file_path: str</span>
 <span class="sd">            The path of the file to be uploaded.</span>
-<span class="sd">        file_name: str</span>
+<span class="sd">        file_name: str or None (default None)</span>
 <span class="sd">            The name to give your file in the MLIL datastore.</span>
 <span class="sd">        overwrite: bool = False</span>
 <span class="sd">            Whether or not to delete any files called &lt;filename&gt; that</span>
 <span class="sd">            currently exist in MLIL. Defaults to False.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        url: str or None (default None)</span>
+<span class="sd">            String containing the URL of your deployment of the platform.</span>
+<span class="sd">        creds: dict or None (default None)</span>
+<span class="sd">            Dictionary that must contain keys &#39;username&#39; and &#39;key&#39;, and associated values.</span>
+<span class="sd">        verbose: bool (default False)</span>
+<span class="sd">            Whether to log verbosely</span>
+<span class="sd">        &#39;&#39;&#39;</span>
 
+        <span class="c1"># Get parameters as needed</span>
         <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span>
         <span class="k">if</span> <span class="n">creds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">creds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">creds</span>
 
+        <span class="k">if</span> <span class="n">file_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">file_name</span> <span class="o">=</span> <span class="n">file_path</span>
+
+        <span class="c1"># Run the upload_data function</span>
         <span class="n">resp</span> <span class="o">=</span> <span class="n">_upload_data</span><span class="p">(</span>
             <span class="n">url</span><span class="p">,</span>
             <span class="n">creds</span><span class="p">,</span>
@@ -1110,6 +1270,7 @@
             <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span>
         <span class="p">)</span>
 
+        <span class="c1"># Log if verbose</span>
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s1"> has been loaded into the MLIL datastore.&#39;</span><span class="p">)</span>
@@ -1117,6 +1278,7 @@
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;Something went wrong, request returned a status code </span><span class="si">{</span><span class="n">resp</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
+        <span class="c1"># Return response</span>
         <span class="k">return</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span></div>
 
 
@@ -1130,12 +1292,12 @@
         <span class="n">url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">creds</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Downloads a file from the MLIL data store.</span>
 
-<span class="sd">        &gt;&gt;&gt; import mlil</span>
-<span class="sd">        &gt;&gt;&gt; client = mlil.MLILClient()</span>
-<span class="sd">        &gt;&gt;&gt; client.download_data()</span>
+<span class="sd">        &gt;&gt;&gt; from mlinsightlab import MLILClient</span>
+<span class="sd">        &gt;&gt;&gt; client = MLILClient()</span>
+<span class="sd">        &gt;&gt;&gt; client.download_data(&#39;test.txt&#39;, &#39;test.txt&#39;)</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1143,13 +1305,21 @@
 <span class="sd">            The name of the file in the MLIL datastore you wish to download.</span>
 <span class="sd">        output_file_name: str</span>
 <span class="sd">            The name of the file to write out to</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        url: str or None (default None)</span>
+<span class="sd">            String containing the URL of your deployment of the platform.</span>
+<span class="sd">        creds: dict or None (default None)</span>
+<span class="sd">            Dictionary that must contain keys &#39;username&#39; and &#39;key&#39;, and associated values.</span>
+<span class="sd">        verbose: bool (default False)</span>
+<span class="sd">            Whether to log verbosely</span>
+<span class="sd">        &#39;&#39;&#39;</span>
 
+        <span class="c1"># Get parameters as needed</span>
         <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span>
         <span class="k">if</span> <span class="n">creds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">creds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">creds</span>
 
+        <span class="c1"># Run the download function</span>
         <span class="n">resp</span> <span class="o">=</span> <span class="n">_download_data</span><span class="p">(</span>
             <span class="n">url</span><span class="p">,</span>
             <span class="n">creds</span><span class="p">,</span>
@@ -1157,6 +1327,7 @@
             <span class="n">output_file_name</span><span class="o">=</span><span class="n">output_file_name</span>
         <span class="p">)</span>
 
+        <span class="c1"># Log if verbose</span>
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">file_name</span><span class="si">}</span><span class="s1"> has been downloaded from the MLIL datastore.&#39;</span><span class="p">)</span>
@@ -1164,6 +1335,7 @@
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;Something went wrong, request returned a status code </span><span class="si">{</span><span class="n">resp</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
+        <span class="c1"># Return the response, which is True if it was successful</span>
         <span class="k">return</span> <span class="n">resp</span></div>
 
 
@@ -1172,36 +1344,43 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">get_variable</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">variable_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">creds</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">creds</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Fetches a variable from the MLIL data store.</span>
 
-<span class="sd">        &gt;&gt;&gt; import mlil</span>
-<span class="sd">        &gt;&gt;&gt; client = mlil.MLILClient()</span>
-<span class="sd">        &gt;&gt;&gt; client.get_variable()</span>
+<span class="sd">        &gt;&gt;&gt; from mlinsightlab import MLILClient</span>
+<span class="sd">        &gt;&gt;&gt; client = MLILClient()</span>
+<span class="sd">        &gt;&gt;&gt; client.get_variable(&#39;test_variable&#39;)</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        file_path: str</span>
-<span class="sd">            The path of the file to be uploaded.</span>
 <span class="sd">        variable_name: str</span>
 <span class="sd">            The name of the variable you wish to access.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        url: str or None (default None)</span>
+<span class="sd">            String containing the URL of your deployment of the platform.</span>
+<span class="sd">        creds: dict or None (default None)</span>
+<span class="sd">            Dictionary that must contain keys &#39;username&#39; and &#39;key&#39;, and associated values.</span>
+<span class="sd">        verbose: bool (default False)</span>
+<span class="sd">            Whether to log verbosely</span>
+<span class="sd">        &#39;&#39;&#39;</span>
 
+        <span class="c1"># Get parameters as needed</span>
         <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span>
         <span class="k">if</span> <span class="n">creds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">creds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">creds</span>
 
+        <span class="c1"># Run the get_variable function</span>
         <span class="n">resp</span> <span class="o">=</span> <span class="n">_get_variable</span><span class="p">(</span>
             <span class="n">url</span><span class="p">,</span>
             <span class="n">creds</span><span class="p">,</span>
             <span class="n">variable_name</span><span class="o">=</span><span class="n">variable_name</span>
         <span class="p">)</span>
 
+        <span class="c1"># Log if verbose</span>
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">variable_name</span><span class="si">}</span><span class="s1"> has been fetched.&#39;</span><span class="p">)</span>
@@ -1209,6 +1388,7 @@
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;Something went wrong, request returned a status code </span><span class="si">{</span><span class="n">resp</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
+        <span class="c1"># Return response</span>
         <span class="k">return</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span></div>
 
 
@@ -1220,28 +1400,36 @@
         <span class="n">creds</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Lists all available variables in the MLIL variable store</span>
 
-<span class="sd">        &gt;&gt;&gt; import mlil</span>
-<span class="sd">        &gt;&gt;&gt; client = mlil.MLILClient()</span>
+<span class="sd">        &gt;&gt;&gt; from mlinsightlab import MLILClient</span>
+<span class="sd">        &gt;&gt;&gt; client = MLILClient()</span>
 <span class="sd">        &gt;&gt;&gt; client.list_variables()</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        This function takes no input parameters.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        url: str or None (default None)</span>
+<span class="sd">            String containing the URL of your deployment of the platform.</span>
+<span class="sd">        creds: dict or None (default None)</span>
+<span class="sd">            Dictionary that must contain keys &#39;username&#39; and &#39;key&#39;, and associated values.</span>
+<span class="sd">        verbose: bool (default False)</span>
+<span class="sd">            Whether to log verbosely</span>
+<span class="sd">        &#39;&#39;&#39;</span>
 
+        <span class="c1"># Get parameters as needed</span>
         <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span>
         <span class="k">if</span> <span class="n">creds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">creds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">creds</span>
 
+        <span class="c1"># Run the list_variables function</span>
         <span class="n">resp</span> <span class="o">=</span> <span class="n">_list_variables</span><span class="p">(</span>
             <span class="n">url</span><span class="p">,</span>
             <span class="n">creds</span>
         <span class="p">)</span>
 
+        <span class="c1"># Log if verbose</span>
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Varying degrees of inter-variable variablility.&#39;</span><span class="p">)</span>
@@ -1249,6 +1437,7 @@
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;Something went wrong, request returned a status code </span><span class="si">{</span><span class="n">resp</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
+        <span class="c1"># Return response</span>
         <span class="k">return</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span></div>
 
 
@@ -1263,12 +1452,12 @@
         <span class="n">url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">creds</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Creates a new variable in the MLIL variable store.</span>
 
-<span class="sd">        &gt;&gt;&gt; import mlil</span>
-<span class="sd">        &gt;&gt;&gt; client = mlil.MLILClient()</span>
-<span class="sd">        &gt;&gt;&gt; client.set_variable()</span>
+<span class="sd">        &gt;&gt;&gt; from mlinsightlab import MLILClient</span>
+<span class="sd">        &gt;&gt;&gt; client = MLILClient()</span>
+<span class="sd">        &gt;&gt;&gt; client.set_variable(&#39;test_variable&#39;, &#39;test_value&#39;)</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1279,13 +1468,15 @@
 <span class="sd">        overwrite: bool = False</span>
 <span class="sd">            Whether or not to delete any variables called &lt;variable_name&gt; that</span>
 <span class="sd">            currently exist in MLIL. Defaults to False.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        &#39;&#39;&#39;</span>
 
+        <span class="c1"># Get parameters as needed</span>
         <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span>
         <span class="k">if</span> <span class="n">creds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">creds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">creds</span>
 
+        <span class="c1"># Run the set_variable function</span>
         <span class="n">resp</span> <span class="o">=</span> <span class="n">_set_variable</span><span class="p">(</span>
             <span class="n">url</span><span class="p">,</span>
             <span class="n">creds</span><span class="p">,</span>
@@ -1294,6 +1485,7 @@
             <span class="n">overwrite</span><span class="o">=</span><span class="n">overwrite</span>
         <span class="p">)</span>
 
+        <span class="c1"># Log if verbose</span>
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">variable_name</span><span class="si">}</span><span class="s1"> has been uploaded to MLIL.&#39;</span><span class="p">)</span>
@@ -1301,6 +1493,7 @@
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;Something went wrong, request returned a status code </span><span class="si">{</span><span class="n">resp</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
+        <span class="c1"># Return the response</span>
         <span class="k">return</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span></div>
 
 
@@ -1313,35 +1506,39 @@
         <span class="n">url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">creds</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Creates a new variable in the MLIL variable store.</span>
 
-<span class="sd">        &gt;&gt;&gt; import mlil</span>
-<span class="sd">        &gt;&gt;&gt; client = mlil.MLILClient()</span>
-<span class="sd">        &gt;&gt;&gt; client.delete_variable()</span>
+<span class="sd">        &gt;&gt;&gt; from mlinsightlab import MLILClient</span>
+<span class="sd">        &gt;&gt;&gt; client = MLILClient()</span>
+<span class="sd">        &gt;&gt;&gt; client.delete_variable(&#39;test_variable&#39;)</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        variable_name: str</span>
 <span class="sd">            The name to give your variable in the MLIL datastore.</span>
-<span class="sd">        value: Any</span>
-<span class="sd">            Your variable. Can be of type string, integer, number, boolean, object, or array&lt;any&gt;.</span>
-<span class="sd">        overwrite: bool = False</span>
-<span class="sd">            Whether or not to delete any variables called &lt;variable_name&gt; that</span>
-<span class="sd">            currently exist in MLIL. Defaults to False.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        url: str or None (default None)</span>
+<span class="sd">            String containing the URL of your deployment of the platform.</span>
+<span class="sd">        creds: dict or None (default None)</span>
+<span class="sd">            Dictionary that must contain keys &#39;username&#39; and &#39;key&#39;, and associated values.</span>
+<span class="sd">        verbose: bool (default False)</span>
+<span class="sd">            Whether to log verbosely</span>
+<span class="sd">        &#39;&#39;&#39;</span>
 
+        <span class="c1"># Get parameters as necessary</span>
         <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span>
         <span class="k">if</span> <span class="n">creds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">creds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">creds</span>
 
+        <span class="c1"># Run the delete_variable function</span>
         <span class="n">resp</span> <span class="o">=</span> <span class="n">_delete_variable</span><span class="p">(</span>
             <span class="n">url</span><span class="p">,</span>
             <span class="n">creds</span><span class="p">,</span>
             <span class="n">variable_name</span><span class="o">=</span><span class="n">variable_name</span>
         <span class="p">)</span>
 
+        <span class="c1"># Log if verbose</span>
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">variable_name</span><span class="si">}</span><span class="s1"> has been removed from MLIL.&#39;</span><span class="p">)</span>
@@ -1349,6 +1546,7 @@
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;Something went wrong, request returned a status code </span><span class="si">{</span><span class="n">resp</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
+        <span class="c1"># Return response</span>
         <span class="k">return</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span></div>
 
 
@@ -1359,16 +1557,16 @@
             <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
             <span class="n">model_flavor</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
             <span class="n">model_version_or_alias</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span>
-            <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
             <span class="n">url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-            <span class="n">creds</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">creds</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Gets predictions from a deployed model</span>
 
 <span class="sd">        &gt;&gt;&gt; from mlinsightlab import MLILClient</span>
 <span class="sd">        &gt;&gt;&gt; client = MLILClient()</span>
-<span class="sd">        &gt;&gt;&gt; client.get_predictions()</span>
+<span class="sd">        &gt;&gt;&gt; client.get_predictions(&#39;test_model&#39;, &#39;test_model_flavor&#39;, &#39;test_model_version&#39;)</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -1378,13 +1576,21 @@
 <span class="sd">            The flavor of the model to get predictions from</span>
 <span class="sd">        model_version_or_alias: str | int</span>
 <span class="sd">            The version or alias of the model to get predictions from</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="sd">        url: str or None (default None)</span>
+<span class="sd">            String containing the URL of your deployment of the platform.</span>
+<span class="sd">        creds: dict or None (default None)</span>
+<span class="sd">            Dictionary that must contain keys &#39;username&#39; and &#39;key&#39;, and associated values.</span>
+<span class="sd">        verbose: bool (default False)</span>
+<span class="sd">            Whether to log verbosely</span>
+<span class="sd">        &#39;&#39;&#39;</span>
 
+        <span class="c1"># Get parameters as needed</span>
         <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span>
         <span class="k">if</span> <span class="n">creds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">creds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">creds</span>
 
+        <span class="c1"># Run the get_predictions function</span>
         <span class="n">resp</span> <span class="o">=</span> <span class="n">_get_predictions</span><span class="p">(</span>
             <span class="n">url</span><span class="p">,</span>
             <span class="n">creds</span><span class="p">,</span>
@@ -1393,6 +1599,7 @@
             <span class="n">model_version_or_alias</span>
         <span class="p">)</span>
 
+        <span class="c1"># Log if verbose</span>
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Predictions have been retrieved&#39;</span><span class="p">)</span>
@@ -1400,6 +1607,7 @@
                 <span class="nb">print</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;Something went wrong, request returned a status code of </span><span class="si">{</span><span class="n">resp</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
+        <span class="c1"># Return the response</span>
         <span class="k">return</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span></div>
 
 
@@ -1411,24 +1619,36 @@
             <span class="n">url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
             <span class="n">creds</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Lists models for which predictions are stored</span>
 
 <span class="sd">        &gt;&gt;&gt; from mlinsightlab import MLILClient</span>
 <span class="sd">        &gt;&gt;&gt; client = MLILClient()</span>
 <span class="sd">        &gt;&gt;&gt; client.list_prediction_models()</span>
-<span class="sd">        &quot;&quot;&quot;</span>
 
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        url: str or None (default None)</span>
+<span class="sd">            String containing the URL of your deployment of the platform.</span>
+<span class="sd">        creds: dict or None (default None)</span>
+<span class="sd">            Dictionary that must contain keys &#39;username&#39; and &#39;key&#39;, and associated values.</span>
+<span class="sd">        verbose: bool (default False)</span>
+<span class="sd">            Whether to log verbosely</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># Get parameters as needed</span>
         <span class="k">if</span> <span class="n">url</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">url</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">url</span>
         <span class="k">if</span> <span class="n">creds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">creds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">creds</span>
 
+        <span class="c1"># Run the list_prediction_models function</span>
         <span class="n">resp</span> <span class="o">=</span> <span class="n">_list_prediction_models</span><span class="p">(</span>
             <span class="n">url</span><span class="p">,</span>
             <span class="n">creds</span>
         <span class="p">)</span>
 
+        <span class="c1"># Log if verbose</span>
         <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">resp</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Models have been retrieved&#39;</span><span class="p">)</span>
@@ -1437,6 +1657,7 @@
                     <span class="sa">f</span><span class="s1">&#39;Something went wrong, request returned a status code of </span><span class="si">{</span><span class="n">resp</span><span class="o">.</span><span class="n">status_code</span><span class="si">}</span><span class="s1">&#39;</span>
                 <span class="p">)</span>
 
+        <span class="c1"># Return response</span>
         <span class="k">return</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span></div>
 </div>
 
