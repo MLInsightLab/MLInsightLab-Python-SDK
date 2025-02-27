@@ -592,13 +592,14 @@ class MLILClient:
             password = self.password
 
         # Run the create_api_key function
-        resp = _create_api_key(url, username=username, password=password)
+        resp = _create_api_key(url, for_username=username,
+                               username=self.username, password=self.password)
 
         # Assign the API key to client
         self.api_key = resp.json()
 
-        # Overwrite the saved credentials if requested
-        if overwrite_api_key:
+        # Overwrite the saved credentials if requested and the API key being changed is the user's
+        if overwrite_api_key and username == self.username:
             auth = {'username': username, 'key': self.api_key,
                     'url': url, 'password': password}
             self._save_credentials(auth)

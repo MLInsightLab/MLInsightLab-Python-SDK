@@ -7,6 +7,7 @@ import requests
 
 def _create_api_key(
     url: str,
+    for_username: str,
     username: str,
     password: str
 ):
@@ -20,18 +21,20 @@ def _create_api_key(
     ----------
     url: str
         String containing the URL of your deployment of the platform.
+    for_username: str
+        The user's display name to issue a new API key for
     username: str
-        The user's display name and login credential
+        The user's display name to use for authentication
     password: str
-        Password for user verification
+        Password for verification
     '''
 
     # Format the URL
-    url = f'{url}/{NEW_API_KEY_ENDPOINT}/{username}'
+    url = f'{url}/{NEW_API_KEY_ENDPOINT}/{for_username}'
 
     # Format the JSON payload
     json_data = {
-        'username': username
+        'username': for_username
     }
 
     # Make the request to the platform
