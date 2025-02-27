@@ -691,13 +691,14 @@
             <span class="n">password</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">password</span>
 
         <span class="c1"># Run the create_api_key function</span>
-        <span class="n">resp</span> <span class="o">=</span> <span class="n">_create_api_key</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="n">password</span><span class="p">)</span>
+        <span class="n">resp</span> <span class="o">=</span> <span class="n">_create_api_key</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">for_username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span>
+                               <span class="n">username</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">)</span>
 
         <span class="c1"># Assign the API key to client</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">api_key</span> <span class="o">=</span> <span class="n">resp</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
 
-        <span class="c1"># Overwrite the saved credentials if requested</span>
-        <span class="k">if</span> <span class="n">overwrite_api_key</span><span class="p">:</span>
+        <span class="c1"># Overwrite the saved credentials if requested and the API key being changed is the user&#39;s</span>
+        <span class="k">if</span> <span class="n">overwrite_api_key</span> <span class="ow">and</span> <span class="n">username</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">:</span>
             <span class="n">auth</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;username&#39;</span><span class="p">:</span> <span class="n">username</span><span class="p">,</span> <span class="s1">&#39;key&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">api_key</span><span class="p">,</span>
                     <span class="s1">&#39;url&#39;</span><span class="p">:</span> <span class="n">url</span><span class="p">,</span> <span class="s1">&#39;password&#39;</span><span class="p">:</span> <span class="n">password</span><span class="p">}</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_save_credentials</span><span class="p">(</span><span class="n">auth</span><span class="p">)</span>
