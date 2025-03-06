@@ -37,9 +37,20 @@ def _load_model(
         including 'requirements', 'quantization_kwargs', and 'kwargs'.
     '''
 
+    if load_request is None:
+        load_request = {
+            'model_name': model_name,
+            'model_flavor': model_flavor,
+            'model_version_or_alias': model_version_or_alias
+        }
+    else:
+        load_request['model_name'] = model_name
+        load_request['model_flavor'] = model_flavor
+        load_request['model_version_or_alias'] = model_version_or_alias
+
     # Format the URL
     url = f'''{
-        url}/{LOAD_MODEL_ENDPOINT}/{model_name}/{model_flavor}/{model_version_or_alias}'''
+        url}/{LOAD_MODEL_ENDPOINT}'''
 
     # Make the request to the platform
     with requests.Session() as sess:
@@ -182,6 +193,9 @@ def _predict(
 
     # Format the JSON payload
     json_data = {
+        'model_name': model_name,
+        'model_flavor': model_flavor,
+        'model_version_or_alias': model_version_or_alias,
         'data': data,
         'predict_function': predict_function,
         'params': params if params else {},
