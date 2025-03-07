@@ -207,8 +207,7 @@ def _predict(
         json_data.update({'dtype': dtype})
 
     # Format the URL
-    url = f'''{
-        url}/{PREDICT_ENDPOINT}/{model_name}/{model_flavor}/{model_version_or_alias}'''
+    url = f'''{url}/{PREDICT_ENDPOINT}'''
 
     # Make the request to the platform
     with requests.Session() as sess:

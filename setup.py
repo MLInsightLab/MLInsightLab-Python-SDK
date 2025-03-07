@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='mlinsightlab',
-    version='0.0.15',
+    version='0.0.16',
     packages=find_packages(where='src'),
     package_dir={'': 'src'},
     install_requires=open('requirements.txt').read().splitlines(),
