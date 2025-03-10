@@ -48,7 +48,8 @@ class ModelManager:
             model_name: str,
             model_flavor: str,
             model_version_or_alias: str,
-            use_gpu: bool = False
+            use_gpu: bool = False,
+            volumes: dict = None
     ):
         '''
         Deploy a containerized model
@@ -65,6 +66,8 @@ class ModelManager:
             The version or alias of the model
         use_gpu : bool (default False)
             If true, will allow the container access to available GPUs
+        volumes : dict or None (default None)
+            If provided, a dictionary of volumes to mount to the container
 
         Returns
         -------
@@ -94,7 +97,8 @@ class ModelManager:
                 device_requests=[
                     docker.types.DeviceRequest(
                         count=-1, capabilities=[['gpu']])
-                ]
+                ],
+                volumes=volumes
             )
         else:
             model_container = self.docker_client.containers.run(
@@ -103,7 +107,8 @@ class ModelManager:
                 environment=environment,
                 network=self.model_network,
                 name=container_name,
-                detach=True
+                detach=True,
+                volumes=volumes
             )
 
         # Append the container properties to the models list
