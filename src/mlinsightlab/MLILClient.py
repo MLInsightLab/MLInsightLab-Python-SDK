@@ -128,7 +128,7 @@ class MLILClient:
                                         'username': username, 'key': api_key}, username=username, password=password)
 
             # Verify that the response is okay, raise exception otherwise
-            if resp.ok:
+            if resp:
                 print(f'User verified. Welcome {username}!')
             else:
                 print('User not verified.')
