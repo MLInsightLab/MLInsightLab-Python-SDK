@@ -23,7 +23,8 @@ class MLILClient:
         self,
         use_cached_credentials: bool = True,
         auth: dict | None = None,
-        cache_credentials: bool = True
+        cache_credentials: bool = True,
+        set_mlflow_environment_variables=True
     ):
         '''
         Initializes the class and sets configuration variables.
@@ -42,8 +43,10 @@ class MLILClient:
                 'password':your user password,
                 'url':the base URL of your platform
             }
-        cache_credentials: bool = True
+        cache_credentials: bool (default True)
             If you provided an auth dictionary, whether you would like to cache those credentials for future use.
+        set_mlflow_environment_variables: bool (default True)
+            If true, sets mlflow variables needed to interface with the lab
         '''
 
         # Configuration path
@@ -71,6 +74,16 @@ class MLILClient:
         self.creds = {'username': self.username, 'key': self.api_key}
         if cache_credentials:
             self._save_credentials(auth)
+
+        # Set mlflow environment variables
+        if set_mlflow_environment_variables:
+            if not os.getenv('MLFLOW_TRACKING_URI'):
+                os.environ['MLFLOW_TRACKING_URI'] = self.url.replace(
+                    '/api', '/mlflow')
+            if not os.getenv('MLFLOW_TRACKING_USERNAME'):
+                os.environ['MLFLOW_TRACKING_USERNAME'] = self.username
+            if not os.getenv('MLFLOW_TRACKING_PASSWORD'):
+                os.environ['MLFLOW_TRACKING_PASSWORD'] = self.password
 
     '''
     ###########################################################################
