@@ -72,6 +72,14 @@
 <li class="toctree-l3"><a class="reference internal" href="#mlinsightlab.MLILClient.MLILClient.verify_password"><code class="docutils literal notranslate"><span class="pre">MLILClient.verify_password()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#mlinsightlab.ModelManager.ModelManager"><code class="docutils literal notranslate"><span class="pre">ModelManager</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#mlinsightlab.ModelManager.ModelManager.deploy_model"><code class="docutils literal notranslate"><span class="pre">ModelManager.deploy_model()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mlinsightlab.ModelManager.ModelManager.get_model_logs"><code class="docutils literal notranslate"><span class="pre">ModelManager.get_model_logs()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mlinsightlab.ModelManager.ModelManager.get_model_status"><code class="docutils literal notranslate"><span class="pre">ModelManager.get_model_status()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mlinsightlab.ModelManager.ModelManager.remove_all_models"><code class="docutils literal notranslate"><span class="pre">ModelManager.remove_all_models()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mlinsightlab.ModelManager.ModelManager.remove_deployed_model"><code class="docutils literal notranslate"><span class="pre">ModelManager.remove_deployed_model()</span></code></a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -664,6 +672,106 @@ currently exist in MLIL. Defaults to False.</p></li>
 <li><p><strong>username</strong> (<em>str</em><em> or </em><em>None</em><em> (</em><em>default None</em><em>)</em>) – The username to test the password for</p></li>
 <li><p><strong>verbose</strong> (<em>bool</em><em> (</em><em>default False</em><em>)</em>) – Whether to print intermediate results</p></li>
 </ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class" id="module-mlinsightlab.ModelManager">
+<dt class="sig sig-object py" id="mlinsightlab.ModelManager.ModelManager">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">mlinsightlab.ModelManager.</span></span><span class="sig-name descname"><span class="pre">ModelManager</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_image</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'ghcr.io/mlinsightlab/mlinsightlab-model-container:main'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_network</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'mlinsightlab_model_network'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mlflow_tracking_uri</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'http://mlflow:2244'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'8888'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mlinsightlab/ModelManager.html#ModelManager"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlinsightlab.ModelManager.ModelManager" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>ModelManager class used to abstract away the deployment of MLflow models to dedicated containers</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="mlinsightlab.ModelManager.ModelManager.deploy_model">
+<span class="sig-name descname"><span class="pre">deploy_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_uri</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_flavor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_version_or_alias</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">use_gpu</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">volumes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mlinsightlab/ModelManager.html#ModelManager.deploy_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlinsightlab.ModelManager.ModelManager.deploy_model" title="Link to this definition"></a></dt>
+<dd><p>Deploy a containerized model</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_uri</strong> (<em>str</em>) – The URI of the model according to MLflow</p></li>
+<li><p><strong>model_name</strong> (<em>str</em>) – The name of the model</p></li>
+<li><p><strong>model_flavor</strong> (<em>str</em>) – The flavor of the model</p></li>
+<li><p><strong>model_version_or_alias</strong> (<em>str</em>) – The version or alias of the model</p></li>
+<li><p><strong>use_gpu</strong> (<em>bool</em><em> (</em><em>default False</em><em>)</em>) – If true, will allow the container access to available GPUs</p></li>
+<li><p><strong>volumes</strong> (<em>dict</em><em> or </em><em>None</em><em> (</em><em>default None</em><em>)</em>) – If provided, a dictionary of volumes to mount to the container</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>success</strong> – Returns True if successful</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlinsightlab.ModelManager.ModelManager.get_model_logs">
+<span class="sig-name descname"><span class="pre">get_model_logs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_flavor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_version_or_alias</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mlinsightlab/ModelManager.html#ModelManager.get_model_logs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlinsightlab.ModelManager.ModelManager.get_model_logs" title="Link to this definition"></a></dt>
+<dd><p>Get the logs of a deployed model</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_name</strong> (<em>str</em>) – The name of the model</p></li>
+<li><p><strong>model_flavor</strong> (<em>str</em>) – The flavor of the model</p></li>
+<li><p><strong>model_version_or_alias</strong> (<em>str</em>) – The version or alias of the model</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>logs</strong> – The logs of the model container</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlinsightlab.ModelManager.ModelManager.get_model_status">
+<span class="sig-name descname"><span class="pre">get_model_status</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_flavor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_version_or_alias</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mlinsightlab/ModelManager.html#ModelManager.get_model_status"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlinsightlab.ModelManager.ModelManager.get_model_status" title="Link to this definition"></a></dt>
+<dd><p>Get the status of a deployed model</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_name</strong> (<em>str</em>) – The name of the model</p></li>
+<li><p><strong>model_flavor</strong> (<em>str</em>) – The flavor of the model</p></li>
+<li><p><strong>model_version_or_alias</strong> (<em>str</em>) – The version or alias of the model</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>status</strong> – The status of the model container</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlinsightlab.ModelManager.ModelManager.remove_all_models">
+<span class="sig-name descname"><span class="pre">remove_all_models</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/mlinsightlab/ModelManager.html#ModelManager.remove_all_models"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlinsightlab.ModelManager.ModelManager.remove_all_models" title="Link to this definition"></a></dt>
+<dd><p>Remove all models</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="mlinsightlab.ModelManager.ModelManager.remove_deployed_model">
+<span class="sig-name descname"><span class="pre">remove_deployed_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_flavor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_version_or_alias</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mlinsightlab/ModelManager.html#ModelManager.remove_deployed_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlinsightlab.ModelManager.ModelManager.remove_deployed_model" title="Link to this definition"></a></dt>
+<dd><p>Remove a deployed model</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_name</strong> (<em>str</em>) – The name of the model</p></li>
+<li><p><strong>model_flavor</strong> (<em>str</em>) – The flavor of the model</p></li>
+<li><p><strong>model_version_or_alias</strong> (<em>str</em>) – The version or alias of the model</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>success</strong> – Returns True if successful</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
 </dd>
 </dl>
 </dd></dl>

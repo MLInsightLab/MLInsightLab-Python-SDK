@@ -1,0 +1,387 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mlinsightlab.ModelManager &mdash; ML Insight Lab Python SDK 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            ML Insight Lab Python SDK
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../MLILClient.html">SDK Documentation</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">ML Insight Lab Python SDK</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">mlinsightlab.ModelManager</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for mlinsightlab.ModelManager</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">docker</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.MLILException</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLILException</span>
+
+
+<div class="viewcode-block" id="ModelManager">
+<a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.ModelManager.ModelManager">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ModelManager</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    ModelManager class used to abstract away the deployment of MLflow models to dedicated containers</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">model_image</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;ghcr.io/mlinsightlab/mlinsightlab-model-container:main&#39;</span><span class="p">,</span>
+        <span class="n">model_network</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;mlinsightlab_model_network&#39;</span><span class="p">,</span>
+        <span class="n">mlflow_tracking_uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;http://mlflow:2244&#39;</span><span class="p">,</span>
+        <span class="n">model_port</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;8888&#39;</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model_image : str (default &#39;ghcr.io/mlinsightlab/mlinsightlab-model-container:main)&#39;</span>
+<span class="sd">            The image of the container to use</span>
+<span class="sd">        model_network : str (default &#39;mlinsightlab_model_network&#39;)</span>
+<span class="sd">            The network to deploy the models to</span>
+<span class="sd">        mlflow_tracking_uri : str (default &#39;http://mlflow:2244&#39;)</span>
+<span class="sd">            The tracking URI for the MLflow service on the docker network</span>
+<span class="sd">        model_port : str (default &#39;8888&#39;)</span>
+<span class="sd">            The port to deploy the model to on the container</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># Create docker container client</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">docker_client</span> <span class="o">=</span> <span class="n">docker</span><span class="o">.</span><span class="n">from_env</span><span class="p">()</span>
+
+        <span class="c1"># Store the image, network, and port on which the images will be stored</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_image</span> <span class="o">=</span> <span class="n">model_image</span> <span class="k">if</span> <span class="n">model_image</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;MODEL_CONTAINER_IMAGE&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_network</span> <span class="o">=</span> <span class="n">model_network</span> <span class="k">if</span> <span class="n">model_network</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;MODEL_NETWORK&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mlflow_tracking_uri</span> <span class="o">=</span> <span class="n">mlflow_tracking_uri</span> <span class="k">if</span> <span class="n">mlflow_tracking_uri</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span>
+            <span class="s1">&#39;MLFLOW_TRACKING_URI&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">container_port</span> <span class="o">=</span> <span class="n">model_port</span> <span class="k">if</span> <span class="n">model_port</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;MODEL_PORT&#39;</span><span class="p">]</span>
+
+        <span class="c1"># Store the containers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="ModelManager.deploy_model">
+<a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.ModelManager.ModelManager.deploy_model">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">deploy_model</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">model_uri</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">model_flavor</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">model_version_or_alias</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">use_gpu</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">volumes</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Deploy a containerized model</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model_uri : str</span>
+<span class="sd">            The URI of the model according to MLflow</span>
+<span class="sd">        model_name : str</span>
+<span class="sd">            The name of the model</span>
+<span class="sd">        model_flavor : str</span>
+<span class="sd">            The flavor of the model</span>
+<span class="sd">        model_version_or_alias : str</span>
+<span class="sd">            The version or alias of the model</span>
+<span class="sd">        use_gpu : bool (default False)</span>
+<span class="sd">            If true, will allow the container access to available GPUs</span>
+<span class="sd">        volumes : dict or None (default None)</span>
+<span class="sd">            If provided, a dictionary of volumes to mount to the container</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        success : bool</span>
+<span class="sd">            Returns True if successful</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># Environment variables for the contianer</span>
+        <span class="n">environment</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;MODEL_URI&#39;</span><span class="p">:</span> <span class="n">model_uri</span><span class="p">,</span>
+            <span class="s1">&#39;MODEL_FLAVOR&#39;</span><span class="p">:</span> <span class="n">model_flavor</span><span class="p">,</span>
+            <span class="s1">&#39;MLFLOW_TRACKING_URI&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">mlflow_tracking_uri</span>
+        <span class="p">}</span>
+
+        <span class="c1"># Name for the container</span>
+        <span class="n">container_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;mlinsightlab__model__</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s1">__</span><span class="si">{</span><span class="n">model_flavor</span><span class="si">}</span><span class="s1">__</span><span class="si">{</span><span class="n">model_version_or_alias</span><span class="si">}</span><span class="s1">&#39;</span>
+
+        <span class="c1"># Run the container, giving it access to the GPU if requested</span>
+        <span class="k">if</span> <span class="n">use_gpu</span><span class="p">:</span>
+            <span class="n">model_container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">docker_client</span><span class="o">.</span><span class="n">containers</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model_image</span><span class="p">,</span>
+                <span class="n">auto_remove</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">environment</span><span class="o">=</span><span class="n">environment</span><span class="p">,</span>
+                <span class="n">network</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_network</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">container_name</span><span class="p">,</span>
+                <span class="n">detach</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">device_requests</span><span class="o">=</span><span class="p">[</span>
+                    <span class="n">docker</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">DeviceRequest</span><span class="p">(</span>
+                        <span class="n">count</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">capabilities</span><span class="o">=</span><span class="p">[[</span><span class="s1">&#39;gpu&#39;</span><span class="p">]])</span>
+                <span class="p">],</span>
+                <span class="n">volumes</span><span class="o">=</span><span class="n">volumes</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">model_container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">docker_client</span><span class="o">.</span><span class="n">containers</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">model_image</span><span class="p">,</span>
+                <span class="n">auto_remove</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">environment</span><span class="o">=</span><span class="n">environment</span><span class="p">,</span>
+                <span class="n">network</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_network</span><span class="p">,</span>
+                <span class="n">name</span><span class="o">=</span><span class="n">container_name</span><span class="p">,</span>
+                <span class="n">detach</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">volumes</span><span class="o">=</span><span class="n">volumes</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Append the container properties to the models list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s1">&#39;model_name&#39;</span><span class="p">:</span> <span class="n">model_name</span><span class="p">,</span>
+                <span class="s1">&#39;model_flavor&#39;</span><span class="p">:</span> <span class="n">model_flavor</span><span class="p">,</span>
+                <span class="s1">&#39;model_version_or_alias&#39;</span><span class="p">:</span> <span class="n">model_version_or_alias</span><span class="p">,</span>
+                <span class="s1">&#39;container_name&#39;</span><span class="p">:</span> <span class="n">model_container</span><span class="o">.</span><span class="n">name</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="ModelManager.remove_deployed_model">
+<a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.ModelManager.ModelManager.remove_deployed_model">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove_deployed_model</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">model_flavor</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">model_version_or_alias</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Remove a deployed model</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model_name : str</span>
+<span class="sd">            The name of the model</span>
+<span class="sd">        model_flavor : str</span>
+<span class="sd">            The flavor of the model</span>
+<span class="sd">        model_version_or_alias : str</span>
+<span class="sd">            The version or alias of the model</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        success : bool</span>
+<span class="sd">            Returns True if successful</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># Search for the container name</span>
+        <span class="n">container_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">model</span><span class="p">[</span><span class="s1">&#39;model_name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">model_name</span> <span class="ow">and</span> <span class="n">model</span><span class="p">[</span><span class="s1">&#39;model_flavor&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">model_flavor</span> <span class="ow">and</span> <span class="n">model</span><span class="p">[</span><span class="s1">&#39;model_version_or_alias&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">model_version_or_alias</span><span class="p">:</span>
+                <span class="n">container_name</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="s1">&#39;container_name&#39;</span><span class="p">]</span>
+                <span class="k">break</span>
+
+        <span class="c1"># Raise exception if container not found</span>
+        <span class="k">if</span> <span class="n">container_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MLILException</span><span class="p">(</span><span class="s1">&#39;Container for that model not found&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Get the container, raise exception if not found</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">docker_client</span><span class="o">.</span><span class="n">containers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">container_name</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MLILException</span><span class="p">(</span><span class="s1">&#39;Container for that model not found&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Try to stop the container, raise exception if unable to</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">container</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">model</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="k">if</span> <span class="n">model</span><span class="p">[</span><span class="s1">&#39;container_name&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">container_name</span>
+            <span class="p">]</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MLILException</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Error trying to stop containerized model: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="ModelManager.remove_all_models">
+<a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.ModelManager.ModelManager.remove_all_models">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">remove_all_models</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Remove all models</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># Go through the models and remove them all</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">remove_deployed_model</span><span class="p">(</span>
+                <span class="n">model</span><span class="p">[</span><span class="s1">&#39;model_name&#39;</span><span class="p">],</span>
+                <span class="n">model</span><span class="p">[</span><span class="s1">&#39;model_flavor&#39;</span><span class="p">],</span>
+                <span class="n">model</span><span class="p">[</span><span class="s1">&#39;model_version_or_alias&#39;</span><span class="p">]</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="ModelManager.get_model_status">
+<a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.ModelManager.ModelManager.get_model_status">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_model_status</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">model_flavor</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">model_version_or_alias</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Get the status of a deployed model</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model_name : str</span>
+<span class="sd">            The name of the model</span>
+<span class="sd">        model_flavor : str</span>
+<span class="sd">            The flavor of the model</span>
+<span class="sd">        model_version_or_alias : str</span>
+<span class="sd">            The version or alias of the model</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        status : str</span>
+<span class="sd">            The status of the model container</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># Search for the container name</span>
+        <span class="n">container_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">model</span><span class="p">[</span><span class="s1">&#39;model_name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">model_name</span> <span class="ow">and</span> <span class="n">model</span><span class="p">[</span><span class="s1">&#39;model_flavor&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">model_flavor</span> <span class="ow">and</span> <span class="n">model</span><span class="p">[</span><span class="s1">&#39;model_version_or_alias&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">model_version_or_alias</span><span class="p">:</span>
+                <span class="n">container_name</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="s1">&#39;container_name&#39;</span><span class="p">]</span>
+                <span class="k">break</span>
+
+        <span class="c1"># Raise exception if not found</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">container_name</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MLILException</span><span class="p">(</span><span class="s1">&#39;Container for that model not found&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Return status</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">docker_client</span><span class="o">.</span><span class="n">containers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">container_name</span><span class="p">)</span><span class="o">.</span><span class="n">status</span></div>
+
+
+<div class="viewcode-block" id="ModelManager.get_model_logs">
+<a class="viewcode-back" href="../../MLILClient.html#mlinsightlab.ModelManager.ModelManager.get_model_logs">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_model_logs</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">model_flavor</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">model_version_or_alias</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Get the logs of a deployed model</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        model_name : str</span>
+<span class="sd">            The name of the model</span>
+<span class="sd">        model_flavor : str</span>
+<span class="sd">            The flavor of the model</span>
+<span class="sd">        model_version_or_alias : str</span>
+<span class="sd">            The version or alias of the model</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        logs : str</span>
+<span class="sd">            The logs of the model container</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+
+        <span class="c1"># Search for the container name</span>
+        <span class="n">container_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">model</span><span class="p">[</span><span class="s1">&#39;model_name&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">model_name</span> <span class="ow">and</span> <span class="n">model</span><span class="p">[</span><span class="s1">&#39;model_flavor&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">model_flavor</span> <span class="ow">and</span> <span class="n">model</span><span class="p">[</span><span class="s1">&#39;model_version_or_alias&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">model_version_or_alias</span><span class="p">:</span>
+                <span class="n">container_name</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="s1">&#39;container_name&#39;</span><span class="p">]</span>
+                <span class="k">break</span>
+
+        <span class="c1"># Raise exception if not found</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">container_name</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">MLILException</span><span class="p">(</span><span class="s1">&#39;Container for that model not found&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Return logs</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">docker_client</span><span class="o">.</span><span class="n">containers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">container_name</span><span class="p">)</span><span class="o">.</span><span class="n">logs</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Jacob Renn, Ian Sotnek.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
