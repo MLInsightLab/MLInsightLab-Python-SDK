@@ -5,8 +5,3 @@ SDK Documentation
     :members:
     :undoc-members:
     :show-inheritance:
-
-.. automodule:: mlinsightlab.ModelManager
-    :members:
-    :undoc-members:
-    :show-inheritance:
