@@ -415,6 +415,8 @@
 <span class="sd">            The URL for the platform. If not provided, will use client parameters</span>
 <span class="sd">        creds: dict or None (default None)</span>
 <span class="sd">            The credentials to use to authenticate with the platform. If not provided, will use client parameters</span>
+<span class="sd">        username: str or None (default None)</span>
+<span class="sd">            The username to test the password for</span>
 <span class="sd">        verbose: bool (default False)</span>
 <span class="sd">            Whether to print intermediate results</span>
 <span class="sd">        &#39;&#39;&#39;</span>
@@ -1031,6 +1033,7 @@
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Resets the MLIL deployment server. Unloads all models and restarts the server, at which point the models will be loaded again.</span>
+
 <span class="sd">        &gt;&gt;&gt; from mlinsightlab import MLILClient</span>
 <span class="sd">        &gt;&gt;&gt; client = MLILClient()</span>
 <span class="sd">        &gt;&gt;&gt; client.reset_deployment_server()</span>
@@ -1087,7 +1090,8 @@
         <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Resets the Jupyter service within the platform</span>
+<span class="sd">        Restarts the Jupyter service within the platform</span>
+
 <span class="sd">        &gt;&gt;&gt; from mlinsightlab import MLILClient</span>
 <span class="sd">        &gt;&gt;&gt; client = MLILClient()</span>
 <span class="sd">        &gt;&gt;&gt; client.restart_jupyter()</span>
