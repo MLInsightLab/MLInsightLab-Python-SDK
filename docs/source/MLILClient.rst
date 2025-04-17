@@ -1,5 +1,5 @@
-SDK Documentation
-=================
+MLILClient Documentation
+========================
 
 .. automodule:: mlinsightlab.MLILClient
     :members:
