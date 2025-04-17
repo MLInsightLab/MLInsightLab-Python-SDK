@@ -331,6 +331,8 @@ class MLILClient:
             The URL for the platform. If not provided, will use client parameters
         creds: dict or None (default None)
             The credentials to use to authenticate with the platform. If not provided, will use client parameters
+        username: str or None (default None)
+            The username to test the password for
         verbose: bool (default False)
             Whether to print intermediate results
         '''
@@ -917,6 +919,7 @@ class MLILClient:
     ):
         '''
         Resets the MLIL deployment server. Unloads all models and restarts the server, at which point the models will be loaded again.
+
         >>> from mlinsightlab import MLILClient
         >>> client = MLILClient()
         >>> client.reset_deployment_server()
@@ -970,7 +973,8 @@ class MLILClient:
         verbose: bool = False
     ):
         '''
-        Resets the Jupyter service within the platform
+        Restarts the Jupyter service within the platform
+
         >>> from mlinsightlab import MLILClient
         >>> client = MLILClient()
         >>> client.restart_jupyter()
