@@ -12,13 +12,8 @@ Welcome to the ML Insight Lab Python SDK documentation. This SDK provides a prog
    :caption: Contents:
 
    MLILClient
-==================
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
-
    ModelManager
-==================
+
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
