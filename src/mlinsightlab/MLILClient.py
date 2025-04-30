@@ -117,7 +117,7 @@ class MLILClient:
                         confirmation = 'y'
 
             # If the user is not in the Jupyter instance of the platform, then ask for the platform URL
-            if confirmation == 'n':
+            if confirmation == 'n' or url is None:
                 url = input('Enter platform URL: ')
                 if not url.endswith('api'):
                     url += '/api'
