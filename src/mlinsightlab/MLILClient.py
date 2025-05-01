@@ -25,7 +25,7 @@ class MLILClient:
         auth: dict | None = None,
         cache_credentials: bool = True,
         set_mlflow_environment_variables=True,
-        ssl_verify = True
+        ssl_verify=True
     ):
         '''
         Initializes the class and sets configuration variables.
@@ -254,7 +254,8 @@ class MLILClient:
             creds = self.creds
 
         # Create user
-        resp = _create_user(url, creds, username, role, api_key, password, ssl_verify=self.ssl_verify)
+        resp = _create_user(url, creds, username, role,
+                            api_key, password, ssl_verify=self.ssl_verify)
 
         # Log if verbose
         if verbose:
@@ -353,7 +354,8 @@ class MLILClient:
             username = self.username
 
         # Run the verify password function
-        resp = _verify_password(url, creds, username, password, ssl_verify=self.ssl_verify)
+        resp = _verify_password(url, creds, username,
+                                password, ssl_verify=self.ssl_verify)
 
         # Print results if verbosity requested
         if verbose:
@@ -413,7 +415,7 @@ class MLILClient:
 
         # Run the issue new password function
         resp = _issue_new_password(
-            url, creds, username, new_password=new_password, ssl_verify = self.ssl_verify)
+            url, creds, username, new_password=new_password, ssl_verify=self.ssl_verify)
 
         # Set new password for client
         if resp.ok:
@@ -473,7 +475,8 @@ class MLILClient:
             creds = self.creds
 
         # Run the get_user_role function
-        resp = _get_user_role(url, creds, username=username, ssl_verify = self.ssl_verify)
+        resp = _get_user_role(url, creds, username=username,
+                              ssl_verify=self.ssl_verify)
 
         # Log if verbose
         if verbose:
@@ -962,7 +965,8 @@ class MLILClient:
 
         # Run the reset
         if really_reset:
-            resp = _reset_platform(url=url, creds=creds, ssl_verify=self.ssl_verify)
+            resp = _reset_platform(url=url, creds=creds,
+                                   ssl_verify=self.ssl_verify)
 
         # Log if verbose
         if verbose:
@@ -1006,7 +1010,8 @@ class MLILClient:
             creds = self.creds
 
         # Run the restart function
-        resp = _restart_jupyter(url=url, creds=creds, ssl_verify=self.ssl_verify)
+        resp = _restart_jupyter(url=url, creds=creds,
+                                ssl_verify=self.ssl_verify)
 
         # Log if verbose
         if verbose:
@@ -1051,7 +1056,8 @@ class MLILClient:
             creds = self.creds
 
         # Run the function
-        resp = _get_platform_resource_usage(url=url, creds=creds, ssl_verify=self.ssl_verify)
+        resp = _get_platform_resource_usage(
+            url=url, creds=creds, ssl_verify=self.ssl_verify)
 
         # Log if verbose
         if verbose:

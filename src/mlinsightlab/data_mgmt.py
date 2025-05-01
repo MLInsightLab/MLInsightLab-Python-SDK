@@ -45,7 +45,7 @@ def _list_data(
             url,
             auth=(creds['username'], creds['key']),
             json=json_data,
-            verify = ssl_verify
+            verify=ssl_verify
         )
 
     # Return either the response itself or raise an error if the request was not successful
@@ -161,7 +161,7 @@ def _download_data(
             url,
             auth=(creds['username'], creds['key']),
             json=json_data,
-            verify = ssl_verify
+            verify=ssl_verify
         )
 
     # If the request was not successful, raise an Exception
@@ -210,7 +210,7 @@ def _get_variable(
         resp = sess.get(
             url,
             auth=(creds['username'], creds['key']),
-            verify = ssl_verify
+            verify=ssl_verify
         )
 
     # If the request was not successful, raise exception, else return the response
@@ -303,7 +303,7 @@ def _set_variable(
             url,
             auth=(creds['username'], creds['key']),
             json=json_data,
-            verify = ssl_verify
+            verify=ssl_verify
         )
 
     # If the request is not successful, raise an appropriate respone, else return the response
@@ -344,7 +344,7 @@ def _delete_variable(
         resp = sess.delete(
             url,
             auth=(creds['username'], creds['key']),
-            verify = ssl_verify
+            verify=ssl_verify
         )
 
     # Return the response or raise an exception as necessary
@@ -390,7 +390,7 @@ def _get_predictions(
         resp = sess.get(
             url,
             auth=(creds['username'], creds['key']),
-            verify = ssl_verify
+            verify=ssl_verify
         )
 
     # Raise an exception or return the successful response
@@ -427,7 +427,7 @@ def _list_prediction_models(
         resp = sess.get(
             url,
             auth=(creds['username'], creds['key']),
-            verify = ssl_verify
+            verify=ssl_verify
         )
 
     # Raise an exception or return the successful response as necessary

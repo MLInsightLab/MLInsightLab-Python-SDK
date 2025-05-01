@@ -58,7 +58,7 @@ def _create_user(
             url,
             auth=(creds['username'], creds['key']),
             json=json_data,
-            verify = ssl_verify
+            verify=ssl_verify
         )
 
     # If the request is not successful, raise exception, else return response
@@ -150,7 +150,7 @@ def _verify_password(
             url,
             auth=(creds['username'], creds['key']),
             json=json_data,
-            verify = ssl_verify
+            verify=ssl_verify
         )
 
     # If the request is not successful, raise exception, else return response
@@ -201,7 +201,7 @@ def _issue_new_password(
             url,
             auth=(creds['username'], creds['key']),
             json=json_data,
-            verify = ssl_verify
+            verify=ssl_verify
         )
 
     # If the request is not successful, raise exception, else return response
@@ -248,7 +248,7 @@ def _get_user_role(
             url,
             auth=(creds['username'], creds['key']),
             json=json_data,
-            verify = ssl_verify
+            verify=ssl_verify
         )
 
     # If the request is not successful, raise exception, else return response
@@ -299,7 +299,7 @@ def _update_user_role(
             url,
             auth=(creds['username'], creds['key']),
             json=json_data,
-            verify = ssl_verify
+            verify=ssl_verify
         )
 
     # If the request is not successful, raise exception, else return response
@@ -337,7 +337,7 @@ def _list_users(
         resp = sess.get(
             url,
             auth=(creds['username'], creds['key']),
-            verify = ssl_verify
+            verify=ssl_verify
         )
 
     # If the request is not successful, raise exception, else return response

@@ -46,7 +46,7 @@ def _create_api_key(
             url,
             auth=(username, password),
             json=json_data,
-            verify = ssl_verify
+            verify=ssl_verify
         )
 
     # If not successful, raise exception, else return response

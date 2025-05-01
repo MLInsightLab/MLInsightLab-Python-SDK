@@ -61,7 +61,7 @@ def _load_model(
             url,
             auth=(creds['username'], creds['key']),
             json=load_request,
-            verify = ssl_verify
+            verify=ssl_verify
         )
 
     # If request is not successful, raise appropriate exception, else return response
@@ -99,7 +99,7 @@ def _list_models(
         resp = sess.get(
             url,
             auth=(creds['username'], creds['key']),
-            verify = ssl_verify
+            verify=ssl_verify
         )
 
     # If the request is not successful, raise an appropriate exception, else return response
@@ -147,7 +147,7 @@ def _unload_model(
         resp = sess.delete(
             url,
             auth=(creds['username'], creds['key']),
-            verify = ssl_verify
+            verify=ssl_verify
         )
 
     # If the request is not successful, raise exception, else return response
@@ -230,7 +230,7 @@ def _predict(
             url,
             auth=(creds['username'], creds['key']),
             json=json_data,
-            verify = ssl_verify
+            verify=ssl_verify
         )
 
     # If the request is not successful, raise exception, else return response

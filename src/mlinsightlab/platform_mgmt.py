@@ -32,7 +32,7 @@ def _reset_platform(
         resp = sess.get(
             url,
             auth=(creds['username'], creds['key']),
-            verify = ssl_verify
+            verify=ssl_verify
         )
 
     # If the request is not successful, raise exception, else return response
@@ -69,7 +69,7 @@ def _restart_jupyter(
         resp = sess.get(
             url,
             auth=(creds['username'], creds['key']),
-            verify = ssl_verify
+            verify=ssl_verify
         )
 
     # If the request is not successful, raise exception, else return response
@@ -104,7 +104,7 @@ def _get_platform_resource_usage(
         resp = sess.get(
             url,
             auth=(creds['username'], creds['key']),
-            verify = ssl_verify
+            verify=ssl_verify
         )
 
     # If the request is not successful, raise exception, else return response
