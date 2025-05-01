@@ -9,7 +9,8 @@ def _create_api_key(
     url: str,
     for_username: str,
     username: str,
-    password: str
+    password: str,
+    ssl_verify: bool = True
 ):
     '''
     NOT MEANT TO BE CALLED BY THE END USER
@@ -27,6 +28,8 @@ def _create_api_key(
         The user's display name to use for authentication
     password: str
         Password for verification
+    ssl_verify: bool (default True)
+        Whether to verify SSL certificates in the request
     '''
 
     # Format the URL
@@ -42,7 +45,8 @@ def _create_api_key(
         resp = sess.put(
             url,
             auth=(username, password),
-            json=json_data
+            json=json_data,
+            verify = ssl_verify
         )
 
     # If not successful, raise exception, else return response

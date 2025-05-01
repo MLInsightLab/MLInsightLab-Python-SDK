@@ -10,7 +10,8 @@ def _create_user(
     username: str,
     role: str,
     api_key: str | None,
-    password: str | None
+    password: str | None,
+    ssl_verify: bool = True
 ):
     '''
     NOT MEANT TO BE CALLED BY THE END USER
@@ -32,6 +33,8 @@ def _create_user(
         An API key for the new user
     password: str or NULL
         Password for user login
+    ssl_verify: bool (default True)
+        Whether to verify SSL certificates in the request
     '''
 
     # Format the URL
@@ -54,7 +57,8 @@ def _create_user(
         resp = sess.post(
             url,
             auth=(creds['username'], creds['key']),
-            json=json_data
+            json=json_data,
+            verify = ssl_verify
         )
 
     # If the request is not successful, raise exception, else return response
@@ -66,7 +70,8 @@ def _create_user(
 def _delete_user(
     url: str,
     creds: dict,
-    username: str
+    username: str,
+    ssl_verify: bool = True
 ):
     '''
     NOT MEANT TO BE CALLED BY THE END USER
@@ -82,6 +87,8 @@ def _delete_user(
         Dictionary that must contain keys 'username' and 'key', and associated values.
     username: str
         The user's display name and login credential
+    ssl_verify: bool (default True)
+        Whether to verify SSL certificates in the request
     '''
 
     json_data = {
@@ -94,7 +101,8 @@ def _delete_user(
         resp = sess.delete(
             url,
             auth=(creds['username'], creds['key']),
-            json=json_data
+            json=json_data,
+            verify=ssl_verify
         )
 
     # If the request is not successful, raise exception, else return response
@@ -107,7 +115,8 @@ def _verify_password(
     url: str,
     creds: dict,
     username: str,
-    password: str
+    password: str,
+    ssl_verify: bool = True
 ):
     '''
     NOT MEANT TO BE CALLED BY THE END USER
@@ -125,6 +134,8 @@ def _verify_password(
         The user's display name and login credential
     password: str
         Password for user login
+    ssl_verify: bool (default True)
+        Whether to verify SSL certificates in the request
     '''
 
     json_data = {
@@ -138,7 +149,8 @@ def _verify_password(
         resp = sess.post(
             url,
             auth=(creds['username'], creds['key']),
-            json=json_data
+            json=json_data,
+            verify = ssl_verify
         )
 
     # If the request is not successful, raise exception, else return response
@@ -151,7 +163,8 @@ def _issue_new_password(
     url: str,
     creds: dict,
     username: str,
-    new_password: str
+    new_password: str,
+    ssl_verify: bool = True
 ):
     '''
     NOT MEANT TO BE CALLED BY THE END USER
@@ -169,6 +182,8 @@ def _issue_new_password(
         The user's display name and login credential
     new_password: str
         New password for user authentication
+    ssl_verify: bool (default True)
+        Whether to verify SSL certificates in the request
     '''
 
     # Format the URL
@@ -185,7 +200,8 @@ def _issue_new_password(
         resp = sess.put(
             url,
             auth=(creds['username'], creds['key']),
-            json=json_data
+            json=json_data,
+            verify = ssl_verify
         )
 
     # If the request is not successful, raise exception, else return response
@@ -198,6 +214,7 @@ def _get_user_role(
     url: str,
     creds: dict,
     username: str,
+    ssl_verify: bool = True
 ):
     '''
     NOT MEANT TO BE CALLED BY THE END USER
@@ -213,6 +230,8 @@ def _get_user_role(
         Dictionary that must contain keys 'username' and 'key', and associated values.
     username: str
         The user's display name and login credential.
+    ssl_verify: bool (default True)
+        Whether to verify SSL certificates in the request
     '''
 
     # Format the URL
@@ -228,7 +247,8 @@ def _get_user_role(
         resp = sess.get(
             url,
             auth=(creds['username'], creds['key']),
-            json=json_data
+            json=json_data,
+            verify = ssl_verify
         )
 
     # If the request is not successful, raise exception, else return response
@@ -241,7 +261,8 @@ def _update_user_role(
     url: str,
     creds: dict,
     username: str,
-    new_role: str
+    new_role: str,
+    ssl_verify: bool = True
 ):
     '''
     NOT MEANT TO BE CALLED BY THE END USER
@@ -259,6 +280,8 @@ def _update_user_role(
         The user's display name and login credential
     new_role: str
         New role to attribute to the specified user
+    ssl_verify: bool (default True)
+        Whether to verify SSL certificates in the request
     '''
 
     # Format the URL
@@ -275,7 +298,8 @@ def _update_user_role(
         resp = sess.put(
             url,
             auth=(creds['username'], creds['key']),
-            json=json_data
+            json=json_data,
+            verify = ssl_verify
         )
 
     # If the request is not successful, raise exception, else return response
@@ -287,6 +311,7 @@ def _update_user_role(
 def _list_users(
     url: str,
     creds: dict,
+    ssl_verify: bool = True
 ):
     '''
     NOT MEANT TO BE CALLED BY THE END USER
@@ -300,6 +325,8 @@ def _list_users(
         String containing the URL of your deployment of the platform.
     creds:
         Dictionary that must contain keys 'username' and 'key', and associated values.
+    ssl_verify: bool (default True)
+        Whether to verify SSL certificates in the request
     '''
 
     # Format the URL
@@ -310,6 +337,7 @@ def _list_users(
         resp = sess.get(
             url,
             auth=(creds['username'], creds['key']),
+            verify = ssl_verify
         )
 
     # If the request is not successful, raise exception, else return response

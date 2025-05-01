@@ -12,7 +12,8 @@ def _load_model(
     model_name: str,
     model_flavor: str,
     model_version_or_alias: str,
-    load_request: dict
+    load_request: dict,
+    ssl_verify: bool = True
 ):
     '''
     NOT MEANT TO BE CALLED BY THE END USER
@@ -35,6 +36,8 @@ def _load_model(
     load_request : dict = None
         A dictionary containing additional parameters for loading the model,
         including 'requirements', 'quantization_kwargs', and 'kwargs'.
+    ssl_verify: bool (default True)
+        Whether to verify SSL certificates in the request
     '''
 
     if load_request is None:
@@ -57,7 +60,8 @@ def _load_model(
         resp = sess.post(
             url,
             auth=(creds['username'], creds['key']),
-            json=load_request
+            json=load_request,
+            verify = ssl_verify
         )
 
     # If request is not successful, raise appropriate exception, else return response
@@ -68,7 +72,8 @@ def _load_model(
 
 def _list_models(
     url: str,
-    creds: dict
+    creds: dict,
+    ssl_verify: bool = True
 ):
     '''
     NOT MEANT TO BE CALLED BY THE END USER
@@ -82,6 +87,8 @@ def _list_models(
         String containing the URL of your deployment of the platform.
     creds:
         Dictionary that must contain keys 'username' and 'key', and associated values.
+    ssl_verify: bool (default True)
+        Whether to verify SSL certificates in the request
     '''
 
     # Format the URL
@@ -92,6 +99,7 @@ def _list_models(
         resp = sess.get(
             url,
             auth=(creds['username'], creds['key']),
+            verify = ssl_verify
         )
 
     # If the request is not successful, raise an appropriate exception, else return response
@@ -105,7 +113,8 @@ def _unload_model(
     creds: dict,
     model_name: str,
     model_flavor: str,
-    model_version_or_alias: str
+    model_version_or_alias: str,
+    ssl_verify: bool = True
 ):
     '''
     NOT MEANT TO BE CALLED BY THE END USER
@@ -125,6 +134,8 @@ def _unload_model(
         The flavor of the model, e.g. 'transformers', 'pyfunc', etc.
     model_version_or_alias: str
         The version of the model that you wish to unload (from MLFlow).
+    ssl_verify: bool (default True)
+        Whether to verify SSL certificates in the request
     '''
 
     # Format the URL
@@ -135,7 +146,8 @@ def _unload_model(
     with requests.Session() as sess:
         resp = sess.delete(
             url,
-            auth=(creds['username'], creds['key'])
+            auth=(creds['username'], creds['key']),
+            verify = ssl_verify
         )
 
     # If the request is not successful, raise exception, else return response
@@ -154,7 +166,8 @@ def _predict(
     convert_to_numpy: bool = True,
     predict_function: str = 'predict',
     dtype: str = None,
-    params: Optional[dict] = None
+    params: Optional[dict] = None,
+    ssl_verify: bool = True
 ):
     '''
     NOT MEANT TO BE CALLED BY THE END USER
@@ -185,6 +198,8 @@ def _predict(
         The data type of the input
     params: dict, optional
         Additional parameters for the prediction.
+    ssl_verify: bool (default True)
+        Whether to verify SSL certificates in the request
     '''
 
     # Format the data so that it is a list
@@ -214,7 +229,8 @@ def _predict(
         resp = sess.post(
             url,
             auth=(creds['username'], creds['key']),
-            json=json_data
+            json=json_data,
+            verify = ssl_verify
         )
 
     # If the request is not successful, raise exception, else return response

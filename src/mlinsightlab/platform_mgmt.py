@@ -6,7 +6,8 @@ import requests
 
 def _reset_platform(
     url: str,
-    creds: dict
+    creds: dict,
+    ssl_verify: bool = True
 ):
     '''
     NOT MEANT TO BE CALLED BY THE END USER
@@ -19,6 +20,8 @@ def _reset_platform(
         String containing the URL of your deployment of the platform.
     creds:
         Dictionary that must contain keys 'username' and 'key', and associated values.
+    ssl_verify: bool (default True)
+        Whether to verify SSL certificates in the request
     '''
 
     # Format the URL
@@ -28,7 +31,8 @@ def _reset_platform(
     with requests.Session() as sess:
         resp = sess.get(
             url,
-            auth=(creds['username'], creds['key'])
+            auth=(creds['username'], creds['key']),
+            verify = ssl_verify
         )
 
     # If the request is not successful, raise exception, else return response
@@ -39,7 +43,8 @@ def _reset_platform(
 
 def _restart_jupyter(
         url: str,
-        creds: dict
+        creds: dict,
+        ssl_verify: bool = True
 ):
     '''
     NOT MEANT TO BE CALLED BY THE END USER
@@ -52,6 +57,8 @@ def _restart_jupyter(
         String containing the URL of your deployment of the platform.
     creds:
         Dictionary that must contain keys 'username' and 'key', and associated values.
+    ssl_verify: bool (default True)
+        Whether to verify SSL certificates in the request
     '''
 
     # Format the URL
@@ -61,7 +68,8 @@ def _restart_jupyter(
     with requests.Session() as sess:
         resp = sess.get(
             url,
-            auth=(creds['username'], creds['key'])
+            auth=(creds['username'], creds['key']),
+            verify = ssl_verify
         )
 
     # If the request is not successful, raise exception, else return response
@@ -72,7 +80,8 @@ def _restart_jupyter(
 
 def _get_platform_resource_usage(
     url: str,
-    creds: dict
+    creds: dict,
+    ssl_verify: bool = True
 ):
     '''
     NOT MEANT TO BE CALLED BY THE END USER
@@ -95,6 +104,7 @@ def _get_platform_resource_usage(
         resp = sess.get(
             url,
             auth=(creds['username'], creds['key']),
+            verify = ssl_verify
         )
 
     # If the request is not successful, raise exception, else return response

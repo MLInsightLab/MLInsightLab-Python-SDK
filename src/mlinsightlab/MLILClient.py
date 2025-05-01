@@ -24,7 +24,8 @@ class MLILClient:
         use_cached_credentials: bool = True,
         auth: dict | None = None,
         cache_credentials: bool = True,
-        set_mlflow_environment_variables=True
+        set_mlflow_environment_variables=True,
+        ssl_verify = True
     ):
         '''
         Initializes the class and sets configuration variables.
@@ -46,8 +47,14 @@ class MLILClient:
         cache_credentials: bool (default True)
             If you provided an auth dictionary, whether you would like to cache those credentials for future use.
         set_mlflow_environment_variables: bool (default True)
-            If true, sets mlflow variables needed to interface with the lab
+            If true, sets mlflow variables needed to interface with the lab.
+        ssl_verify: bool (default True)
+            Whether to verify SSL certificates when making requests to the server.
+            NOTE: Not validating SSL certificates is discouraged, but necessary in some scenarios, such as using self-signed certificates. Use at your discretion!
         '''
+
+        # Set SSL verify
+        self.ssl_verify = ssl_verify
 
         # Configuration path
         self.config_path = Path((f'{Path.home()}/.mlil/config.json'))
@@ -247,7 +254,7 @@ class MLILClient:
             creds = self.creds
 
         # Create user
-        resp = _create_user(url, creds, username, role, api_key, password)
+        resp = _create_user(url, creds, username, role, api_key, password, ssl_verify=self.ssl_verify)
 
         # Log if verbose
         if verbose:
@@ -294,7 +301,7 @@ class MLILClient:
             creds = self.creds
 
         # Run the delete user function
-        resp = _delete_user(url, creds, username)
+        resp = _delete_user(url, creds, username, ssl_verify=self.ssl_verify)
 
         # Print as needed for verbosity requested
         if verbose:
@@ -346,7 +353,7 @@ class MLILClient:
             username = self.username
 
         # Run the verify password function
-        resp = _verify_password(url, creds, username, password)
+        resp = _verify_password(url, creds, username, password, ssl_verify=self.ssl_verify)
 
         # Print results if verbosity requested
         if verbose:
@@ -406,7 +413,7 @@ class MLILClient:
 
         # Run the issue new password function
         resp = _issue_new_password(
-            url, creds, username, new_password=new_password)
+            url, creds, username, new_password=new_password, ssl_verify = self.ssl_verify)
 
         # Set new password for client
         if resp.ok:
@@ -466,7 +473,7 @@ class MLILClient:
             creds = self.creds
 
         # Run the get_user_role function
-        resp = _get_user_role(url, creds, username=username)
+        resp = _get_user_role(url, creds, username=username, ssl_verify = self.ssl_verify)
 
         # Log if verbose
         if verbose:
@@ -517,7 +524,7 @@ class MLILClient:
 
         # Run the update_user_role function
         resp = _update_user_role(
-            url, creds, username=username, new_role=new_role)
+            url, creds, username=username, new_role=new_role, ssl_verify=self.ssl_verify)
 
         # Log if verbose
         if verbose:
@@ -555,7 +562,7 @@ class MLILClient:
         if creds is None:
             creds = self.creds
 
-        resp = _list_users(url, creds)
+        resp = _list_users(url, creds, ssl_verify=self.ssl_verify)
 
         if verbose:
             if resp.status_code == 200:
@@ -608,7 +615,7 @@ class MLILClient:
 
         # Run the create_api_key function
         resp = _create_api_key(url, for_username=username,
-                               username=self.username, password=self.password)
+                               username=self.username, password=self.password, ssl_verify=self.ssl_verify)
 
         # Assign the API key to client
         self.api_key = resp.json()
@@ -702,7 +709,8 @@ class MLILClient:
                            model_name=model_name,
                            model_flavor=model_flavor,
                            model_version_or_alias=model_version_or_alias,
-                           load_request=load_request
+                           load_request=load_request,
+                           ssl_verify=self.ssl_verify
                            )
 
         # Log if verbose
@@ -747,7 +755,7 @@ class MLILClient:
             creds = self.creds
 
         # Run the list_models function
-        resp = _list_models(url=url, creds=creds)
+        resp = _list_models(url=url, creds=creds, ssl_verify=self.ssl_verify)
 
         # Log if verbose
         if verbose:
@@ -808,7 +816,8 @@ class MLILClient:
             creds,
             model_name=model_name,
             model_flavor=model_flavor,
-            model_version_or_alias=model_version_or_alias
+            model_version_or_alias=model_version_or_alias,
+            ssl_verify=self.ssl_verify
         )
 
         # Log if verbose
@@ -890,7 +899,8 @@ class MLILClient:
             predict_function=predict_function,
             dtype=dtype,
             params=params,
-            convert_to_numpy=convert_to_numpy
+            convert_to_numpy=convert_to_numpy,
+            ssl_verify=self.ssl_verify
         )
 
         # Log if verbose
@@ -952,7 +962,7 @@ class MLILClient:
 
         # Run the reset
         if really_reset:
-            resp = _reset_platform(url=url, creds=creds)
+            resp = _reset_platform(url=url, creds=creds, ssl_verify=self.ssl_verify)
 
         # Log if verbose
         if verbose:
@@ -996,7 +1006,7 @@ class MLILClient:
             creds = self.creds
 
         # Run the restart function
-        resp = _restart_jupyter(url=url, creds=creds)
+        resp = _restart_jupyter(url=url, creds=creds, ssl_verify=self.ssl_verify)
 
         # Log if verbose
         if verbose:
@@ -1041,7 +1051,7 @@ class MLILClient:
             creds = self.creds
 
         # Run the function
-        resp = _get_platform_resource_usage(url=url, creds=creds)
+        resp = _get_platform_resource_usage(url=url, creds=creds, ssl_verify=self.ssl_verify)
 
         # Log if verbose
         if verbose:
@@ -1097,7 +1107,8 @@ class MLILClient:
         resp = _list_data(
             url,
             creds,
-            directory
+            directory,
+            ssl_verify=self.ssl_verify
         )
 
         # Log if verbose
@@ -1159,7 +1170,8 @@ class MLILClient:
             creds,
             file_path=file_path,
             file_name=file_name,
-            overwrite=overwrite
+            overwrite=overwrite,
+            ssl_verify=self.ssl_verify
         )
 
         # Log if verbose
@@ -1213,7 +1225,8 @@ class MLILClient:
             url,
             creds,
             file_name=file_name,
-            output_file_name=output_file_name
+            output_file_name=output_file_name,
+            ssl_verify=self.ssl_verify
         )
 
         # Log if verbose
@@ -1263,7 +1276,8 @@ class MLILClient:
         resp = _get_variable(
             url,
             creds,
-            variable_name=variable_name
+            variable_name=variable_name,
+            ssl_verify=self.ssl_verify
         )
 
         # Log if verbose
@@ -1309,7 +1323,8 @@ class MLILClient:
         # Run the list_variables function
         resp = _list_variables(
             url,
-            creds
+            creds,
+            ssl_verify=self.ssl_verify
         )
 
         # Log if verbose
@@ -1362,7 +1377,8 @@ class MLILClient:
             creds,
             variable_name=variable_name,
             value=value,
-            overwrite=overwrite
+            overwrite=overwrite,
+            ssl_verify=self.ssl_verify
         )
 
         # Log if verbose
@@ -1412,7 +1428,8 @@ class MLILClient:
         resp = _delete_variable(
             url,
             creds,
-            variable_name=variable_name
+            variable_name=variable_name,
+            ssl_verify=self.ssl_verify
         )
 
         # Log if verbose
@@ -1470,7 +1487,8 @@ class MLILClient:
             creds,
             model_name,
             model_flavor,
-            model_version_or_alias
+            model_version_or_alias,
+            ssl_verify=self.ssl_verify
         )
 
         # Log if verbose
@@ -1516,7 +1534,8 @@ class MLILClient:
         # Run the list_prediction_models function
         resp = _list_prediction_models(
             url,
-            creds
+            creds,
+            ssl_verify=self.ssl_verify
         )
 
         # Log if verbose

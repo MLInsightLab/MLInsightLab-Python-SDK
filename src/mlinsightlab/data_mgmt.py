@@ -10,7 +10,8 @@ import base64
 def _list_data(
     url: str,
     creds: dict,
-    directory: str
+    directory: str,
+    ssl_verify: bool = True
 ):
     '''
     NOT MEANT TO BE CALLED BY THE END USER
@@ -26,6 +27,8 @@ def _list_data(
         Dictionary that must contain keys 'username' and 'key', and associated values.
     directory: str
         Name of the directory you wish to view the contents of in the `/data` directory on the platform.
+    ssl_verify: bool (default True)
+        Whether to verify SSL certificates in the request
     '''
 
     # Format the URL
@@ -41,7 +44,8 @@ def _list_data(
         resp = sess.post(
             url,
             auth=(creds['username'], creds['key']),
-            json=json_data
+            json=json_data,
+            verify = ssl_verify
         )
 
     # Return either the response itself or raise an error if the request was not successful
@@ -55,7 +59,8 @@ def _upload_data(
     creds: dict,
     file_path: str,
     file_name: str,
-    overwrite: bool = False
+    overwrite: bool = False,
+    ssl_verify: bool = True
 ):
     '''
     NOT MEANT TO BE CALLED BY THE END USER
@@ -76,6 +81,8 @@ def _upload_data(
     overwrite: bool
         Whether or not to overwrite the file, if a file of the same name
         already exists.
+    ssl_verify: bool (default True)
+        Whether to verify SSL certificates in the request
     '''
 
     # Format the URL
@@ -98,7 +105,8 @@ def _upload_data(
         resp = sess.post(
             url,
             auth=(creds['username'], creds['key']),
-            json=json_data
+            json=json_data,
+            verify=ssl_verify
         )
 
     # Return either the response itself or raise an error if the request was not successful
@@ -111,7 +119,8 @@ def _download_data(
     url: str,
     creds: dict,
     file_name: str,
-    output_file_name: str
+    output_file_name: str,
+    ssl_verify: bool = True
 ):
     '''
     NOT MEANT TO BE CALLED BY THE END USER
@@ -129,6 +138,8 @@ def _download_data(
         The name of the file to download.
     output_file_name: str
         The output name of the file to write to
+    ssl_verify: bool (default True)
+        Whether to verify SSL certificates in the request
 
     Returns
     -------
@@ -149,7 +160,8 @@ def _download_data(
         resp = sess.post(
             url,
             auth=(creds['username'], creds['key']),
-            json=json_data
+            json=json_data,
+            verify = ssl_verify
         )
 
     # If the request was not successful, raise an Exception
@@ -169,7 +181,8 @@ def _download_data(
 def _get_variable(
     url: str,
     creds: dict,
-    variable_name: str
+    variable_name: str,
+    ssl_verify: bool = True
 ):
     '''
     NOT MEANT TO BE CALLED BY THE END USER
@@ -185,6 +198,8 @@ def _get_variable(
         Dictionary that must contain keys 'username' and 'key', and associated values.
     variable_name: str
         The name of the variable to access.
+    ssl_verify: bool (default True)
+        Whether to verify SSL certificates in the request
     '''
 
     # Format the URL
@@ -194,7 +209,8 @@ def _get_variable(
     with requests.Session() as sess:
         resp = sess.get(
             url,
-            auth=(creds['username'], creds['key'])
+            auth=(creds['username'], creds['key']),
+            verify = ssl_verify
         )
 
     # If the request was not successful, raise exception, else return the response
@@ -205,7 +221,8 @@ def _get_variable(
 
 def _list_variables(
     url: str,
-    creds: dict
+    creds: dict,
+    ssl_verify: bool = True
 ):
     '''
     NOT MEANT TO BE CALLED BY THE END USER
@@ -219,6 +236,8 @@ def _list_variables(
         String containing the URL of your deployment of the platform.
     creds: dict
         Dictionary that must contain keys 'username' and 'key', and associated values.
+    ssl_verify: bool (default True)
+        Whether to verify SSL certificates in the request
     '''
 
     # Format the URL
@@ -228,7 +247,8 @@ def _list_variables(
     with requests.Session() as sess:
         resp = sess.get(
             url,
-            auth=(creds['username'], creds['key'])
+            auth=(creds['username'], creds['key']),
+            verify=ssl_verify
         )
 
     # If the request was not successful, raise appropriate exception, else return the response
@@ -242,7 +262,8 @@ def _set_variable(
     creds: dict,
     variable_name: str,
     value: Any,
-    overwrite: bool = False
+    overwrite: bool = False,
+    ssl_verify: bool = True
 ):
     '''
     NOT MEANT TO BE CALLED BY THE END USER
@@ -262,6 +283,8 @@ def _set_variable(
         Whether to overwrite any variables that currently exist in MLIL and have the same name.
     value: Any
         Your variable. Can be of type string | integer | number | boolean | object | array<any>.
+    ssl_verify: bool (default True)
+        Whether to verify SSL certificates in the request
     '''
 
     # Format the URL
@@ -279,7 +302,8 @@ def _set_variable(
         resp = sess.post(
             url,
             auth=(creds['username'], creds['key']),
-            json=json_data
+            json=json_data,
+            verify = ssl_verify
         )
 
     # If the request is not successful, raise an appropriate respone, else return the response
@@ -291,7 +315,8 @@ def _set_variable(
 def _delete_variable(
     url: str,
     creds: dict,
-    variable_name: str
+    variable_name: str,
+    ssl_verify: bool = True
 ):
     '''
     NOT MEANT TO BE CALLED BY THE END USER
@@ -307,6 +332,8 @@ def _delete_variable(
         Dictionary that must contain keys 'username' and 'key', and associated values.
     variable_name: str
         The name of the variable to delete.
+    ssl_verify: bool (default True)
+        Whether to verify SSL certificates in the request
     '''
 
     # Format the URL
@@ -316,7 +343,8 @@ def _delete_variable(
     with requests.Session() as sess:
         resp = sess.delete(
             url,
-            auth=(creds['username'], creds['key'])
+            auth=(creds['username'], creds['key']),
+            verify = ssl_verify
         )
 
     # Return the response or raise an exception as necessary
@@ -330,7 +358,8 @@ def _get_predictions(
         creds: dict,
         model_name: str,
         model_flavor: str,
-        model_version_or_alias: str | int
+        model_version_or_alias: str | int,
+        ssl_verify: bool = True
 ):
     '''
     NOT MEANT TO BE CALLED BY THE END USER
@@ -349,6 +378,8 @@ def _get_predictions(
         The flavor of the model to get predictions from
     model_version: str | int
         The version of the model to get predictions from
+    ssl_verify: bool (default True)
+        Whether to verify SSL certificates in the request
     '''
 
     # Format the URL
@@ -358,7 +389,8 @@ def _get_predictions(
     with requests.Session() as sess:
         resp = sess.get(
             url,
-            auth=(creds['username'], creds['key'])
+            auth=(creds['username'], creds['key']),
+            verify = ssl_verify
         )
 
     # Raise an exception or return the successful response
@@ -369,7 +401,8 @@ def _get_predictions(
 
 def _list_prediction_models(
         url: str,
-        creds: dict
+        creds: dict,
+        ssl_verify: bool = True
 ):
     '''
     NOT MEANT TO BE CALLED BY THE END USER
@@ -382,6 +415,8 @@ def _list_prediction_models(
         String containing the URL of your deployment of the platform
     creds: dict
         Dictionary that must contain keys 'username' and 'key', and associated values.
+    ssl_verify: bool (default True)
+        Whether to verify SSL certificates in the request
     '''
 
     # Format the URL
@@ -391,7 +426,8 @@ def _list_prediction_models(
     with requests.Session() as sess:
         resp = sess.get(
             url,
-            auth=(creds['username'], creds['key'])
+            auth=(creds['username'], creds['key']),
+            verify = ssl_verify
         )
 
     # Raise an exception or return the successful response as necessary
