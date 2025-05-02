@@ -17,6 +17,28 @@ from .data_mgmt import _upload_data, _download_data, _get_variable, _list_data, 
 class MLILClient:
     '''
     Client for interacting with the ML Insight Lab (MLIL) Platform
+
+    Parameters
+    ----------
+    use_cached_credentials: bool (default True)
+        Login using credentials that have been previosuly cached on your system.
+        Bypasses the interactive login flow.
+    auth: dict or None (default None)
+        Dictionary of credentials to use for the instantiated client.
+        Must be of structure:
+        {
+            'username':username,
+            'key':your api key,
+            'password':your user password,
+            'url':the base URL of your platform
+        }
+    cache_credentials: bool (default True)
+        If you provided an auth dictionary, whether you would like to cache those credentials for future use.
+    set_mlflow_environment_variables: bool (default True)
+        If true, sets mlflow variables needed to interface with the lab.
+    ssl_verify: bool (default True)
+        Whether to verify SSL certificates when making requests to the server.
+        NOTE: Not validating SSL certificates is discouraged, but necessary in some scenarios, such as using self-signed certificates. Use at your discretion!
     '''
 
     def __init__(
@@ -27,31 +49,6 @@ class MLILClient:
         set_mlflow_environment_variables=True,
         ssl_verify=True
     ):
-        '''
-        Initializes the class and sets configuration variables.
-
-        Parameters
-        ----------
-        use_cached_credentials: bool (default True)
-            Login using credentials that have been previosuly cached on your system.
-            Bypasses the interactive login flow.
-        auth: dict or None (default None)
-            Dictionary of credentials to use for the instantiated client.
-            Must be of structure:
-            {
-                'username':username,
-                'key':your api key,
-                'password':your user password,
-                'url':the base URL of your platform
-            }
-        cache_credentials: bool (default True)
-            If you provided an auth dictionary, whether you would like to cache those credentials for future use.
-        set_mlflow_environment_variables: bool (default True)
-            If true, sets mlflow variables needed to interface with the lab.
-        ssl_verify: bool (default True)
-            Whether to verify SSL certificates when making requests to the server.
-            NOTE: Not validating SSL certificates is discouraged, but necessary in some scenarios, such as using self-signed certificates. Use at your discretion!
-        '''
 
         # Set SSL verify
         self.ssl_verify = ssl_verify
