@@ -91,6 +91,28 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">MLILClient</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Client for interacting with the ML Insight Lab (MLIL) Platform</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    use_cached_credentials: bool (default True)</span>
+<span class="sd">        Login using credentials that have been previosuly cached on your system.</span>
+<span class="sd">        Bypasses the interactive login flow.</span>
+<span class="sd">    auth: dict or None (default None)</span>
+<span class="sd">        Dictionary of credentials to use for the instantiated client.</span>
+<span class="sd">        Must be of structure:</span>
+<span class="sd">        {</span>
+<span class="sd">            &#39;username&#39;:username,</span>
+<span class="sd">            &#39;key&#39;:your api key,</span>
+<span class="sd">            &#39;password&#39;:your user password,</span>
+<span class="sd">            &#39;url&#39;:the base URL of your platform</span>
+<span class="sd">        }</span>
+<span class="sd">    cache_credentials: bool (default True)</span>
+<span class="sd">        If you provided an auth dictionary, whether you would like to cache those credentials for future use.</span>
+<span class="sd">    set_mlflow_environment_variables: bool (default True)</span>
+<span class="sd">        If true, sets mlflow variables needed to interface with the lab.</span>
+<span class="sd">    ssl_verify: bool (default True)</span>
+<span class="sd">        Whether to verify SSL certificates when making requests to the server.</span>
+<span class="sd">        NOTE: Not validating SSL certificates is discouraged, but necessary in some scenarios, such as using self-signed certificates. Use at your discretion!</span>
 <span class="sd">    &#39;&#39;&#39;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
@@ -101,31 +123,6 @@
         <span class="n">set_mlflow_environment_variables</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">ssl_verify</span><span class="o">=</span><span class="kc">True</span>
     <span class="p">):</span>
-<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">        Initializes the class and sets configuration variables.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        use_cached_credentials: bool (default True)</span>
-<span class="sd">            Login using credentials that have been previosuly cached on your system.</span>
-<span class="sd">            Bypasses the interactive login flow.</span>
-<span class="sd">        auth: dict or None (default None)</span>
-<span class="sd">            Dictionary of credentials to use for the instantiated client.</span>
-<span class="sd">            Must be of structure:</span>
-<span class="sd">            {</span>
-<span class="sd">                &#39;username&#39;:username,</span>
-<span class="sd">                &#39;key&#39;:your api key,</span>
-<span class="sd">                &#39;password&#39;:your user password,</span>
-<span class="sd">                &#39;url&#39;:the base URL of your platform</span>
-<span class="sd">            }</span>
-<span class="sd">        cache_credentials: bool (default True)</span>
-<span class="sd">            If you provided an auth dictionary, whether you would like to cache those credentials for future use.</span>
-<span class="sd">        set_mlflow_environment_variables: bool (default True)</span>
-<span class="sd">            If true, sets mlflow variables needed to interface with the lab.</span>
-<span class="sd">        ssl_verify: bool (default True)</span>
-<span class="sd">            Whether to verify SSL certificates when making requests to the server.</span>
-<span class="sd">            NOTE: Not validating SSL certificates is discouraged, but necessary in some scenarios, such as using self-signed certificates. Use at your discretion!</span>
-<span class="sd">        &#39;&#39;&#39;</span>
 
         <span class="c1"># Set SSL verify</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ssl_verify</span> <span class="o">=</span> <span class="n">ssl_verify</span>
