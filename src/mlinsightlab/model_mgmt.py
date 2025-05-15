@@ -1,12 +1,12 @@
 # Helper functions to manage and interat with models in the platform
 from .MLILException import MLILException
 from typing import Union, List, Optional
-from .endpoints import LOAD_MODEL_ENDPOINT, LIST_MODELS_ENDPOINT, UNLOAD_MODEL_ENDPOINT, PREDICT_ENDPOINT
+from .endpoints import DEPLOY_MODEL_ENDPOINT, LIST_MODELS_ENDPOINT, UNDEPLOY_MODEL_ENDPOINT, PREDICT_ENDPOINT
 import pandas as pd
 import requests
 
 
-def _load_model(
+def _deploy_model(
     url: str,
     creds: dict,
     model_name: str,
@@ -18,7 +18,7 @@ def _load_model(
     '''
     NOT MEANT TO BE CALLED BY THE END USER
 
-    Loads a saved model into memory.
+    Deploys a model.
     Called within the MLILClient class.
 
     Parameters
@@ -53,7 +53,7 @@ def _load_model(
 
     # Format the URL
     url = f'''{
-        url}/{LOAD_MODEL_ENDPOINT}'''
+        url}/{DEPLOY_MODEL_ENDPOINT}'''
 
     # Make the request to the platform
     with requests.Session() as sess:
@@ -78,7 +78,7 @@ def _list_models(
     '''
     NOT MEANT TO BE CALLED BY THE END USER
 
-    Lists all *loaded* models. To view unloaded models, check the MLFlow UI.
+    Lists all *deployed* models. To view undeployed models, check the MLFlow UI.
     Called within the MLILClient class.
 
     Parameters
@@ -108,7 +108,7 @@ def _list_models(
     return resp
 
 
-def _unload_model(
+def _undeploy_model(
     url: str,
     creds: dict,
     model_name: str,
@@ -140,7 +140,7 @@ def _unload_model(
 
     # Format the URL
     url = f'''{
-        url}/{UNLOAD_MODEL_ENDPOINT}/{model_name}/{model_flavor}/{model_version_or_alias}'''
+        url}/{UNDEPLOY_MODEL_ENDPOINT}/{model_name}/{model_flavor}/{model_version_or_alias}'''
 
     # Make the request to the platform
     with requests.Session() as sess:
@@ -172,7 +172,7 @@ def _predict(
     '''
     NOT MEANT TO BE CALLED BY THE END USER
 
-    Calls the 'predict' function of the specified MLFlow model.
+    Calls the 'predict' function of the specified deployed model.
 
     Called within the MLILClient class.
 

@@ -9,7 +9,7 @@ import os
 from .MLILException import MLILException
 from .user_mgmt import _create_user, _delete_user, _verify_password, _issue_new_password, _get_user_role, _update_user_role, _list_users
 from .key_mgmt import _create_api_key
-from .model_mgmt import _load_model, _unload_model, _list_models, _predict
+from .model_mgmt import _deploy_model, _undeploy_model, _list_models, _predict
 from .platform_mgmt import _reset_platform, _get_platform_resource_usage, _restart_jupyter
 from .data_mgmt import _upload_data, _download_data, _get_variable, _list_data, _list_variables, _set_variable, _delete_variable, _get_predictions, _list_prediction_models
 
@@ -643,7 +643,7 @@ class MLILClient:
     ###########################################################################
     '''
 
-    def load_model(
+    def deploy_model(
         self,
         model_name: str,
         model_flavor: str,
@@ -656,11 +656,11 @@ class MLILClient:
         **kwargs
     ):
         '''
-        Loads a saved model into memory within the platform.
+        Deploys a model with the platform.
 
         >>> from mlinsightlab import MLILClient
         >>> client = MLILClient()
-        >>> client.load_model('test_model', 'test_model_flavor', 'test_model_version_or_alias')
+        >>> client.deploy_model('test_model', 'test_model_flavor', 'test_model_version_or_alias')
 
         Parameters
         ----------
@@ -704,14 +704,14 @@ class MLILClient:
             load_request['kwargs'] = kwargs
 
         # Run the load_model function
-        resp = _load_model(url,
-                           creds,
-                           model_name=model_name,
-                           model_flavor=model_flavor,
-                           model_version_or_alias=model_version_or_alias,
-                           load_request=load_request,
-                           ssl_verify=self.ssl_verify
-                           )
+        resp = _deploy_model(url,
+                             creds,
+                             model_name=model_name,
+                             model_flavor=model_flavor,
+                             model_version_or_alias=model_version_or_alias,
+                             load_request=load_request,
+                             ssl_verify=self.ssl_verify
+                             )
 
         # Log if verbose
         if verbose:
@@ -768,7 +768,7 @@ class MLILClient:
         # Return the response
         return resp.json()
 
-    def unload_model(
+    def undeploy_model(
         self,
         model_name: str,
         model_flavor: str,
@@ -778,11 +778,11 @@ class MLILClient:
         verbose: bool = False
     ):
         '''
-        Removes a loaded model from memory.
+        Removes a deployed model.
 
         >>> from mlinsightlab import MLILClient
         >>> client = MLILClient()
-        >>> client.unload_model('test_model', 'test_model_flavor', 'test_model_version')
+        >>> client.undeploy_model('test_model', 'test_model_flavor', 'test_model_version')
 
         Parameters
         ----------
@@ -811,7 +811,7 @@ class MLILClient:
             creds = self.creds
 
         # Run the unload_model function
-        resp = _unload_model(
+        resp = _undeploy_model(
             url,
             creds,
             model_name=model_name,

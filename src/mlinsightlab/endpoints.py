@@ -2,9 +2,9 @@
 
 LOGIN_ENDPOINT = None  # TODO - May be deleted in a future version
 VERIFY_PASSWORD_ENDPOINT = 'password/verify'
-LOAD_MODEL_ENDPOINT = 'models/load'
+DEPLOY_MODEL_ENDPOINT = 'models/deploy'
 LIST_MODELS_ENDPOINT = 'models/list'
-UNLOAD_MODEL_ENDPOINT = 'models/unload'
+UNDEPLOY_MODEL_ENDPOINT = 'models/undeploy'
 PREDICT_ENDPOINT = 'models/predict'
 CREATE_USER_ENDPOINT = 'users/create'
 DELETE_USER_ENDPOINT = 'users/delete'

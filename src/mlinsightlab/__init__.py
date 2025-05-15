@@ -9,4 +9,4 @@ from .ModelManager import ModelManager
 from .MLILClient import MLILClient
 
 __all__ = ['MLILClient', 'ModelManager']
-__version__ = '0.0.22'
+__version__ = '0.0.23'
