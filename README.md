@@ -1,4 +1,9 @@
 # MLIL Python Client
+
+![License](https://img.shields.io/github/license/mlinsightlab/mlinsightlab-python-sdk)
+![PyPI](https://img.shields.io/pypi/v/mlinsightlab)
+![GitHub stars](https://img.shields.io/github/stars/mlinsightlab/mlinsightlab-python-sdk?style=social)
+
 This package allows you to more easily interact with the MLIL platform from a Python interface.
 
 Please note that this is a supplement to the JupyterLab instance in the platform and, as such, 
