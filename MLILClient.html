@@ -50,14 +50,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#mlinsightlab.MLILClient.MLILClient.delete_user"><code class="docutils literal notranslate"><span class="pre">MLILClient.delete_user()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mlinsightlab.MLILClient.MLILClient.delete_variable"><code class="docutils literal notranslate"><span class="pre">MLILClient.delete_variable()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mlinsightlab.MLILClient.MLILClient.deploy_model"><code class="docutils literal notranslate"><span class="pre">MLILClient.deploy_model()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#mlinsightlab.MLILClient.MLILClient.download_data"><code class="docutils literal notranslate"><span class="pre">MLILClient.download_data()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mlinsightlab.MLILClient.MLILClient.get_predictions"><code class="docutils literal notranslate"><span class="pre">MLILClient.get_predictions()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mlinsightlab.MLILClient.MLILClient.get_resource_usage"><code class="docutils literal notranslate"><span class="pre">MLILClient.get_resource_usage()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mlinsightlab.MLILClient.MLILClient.get_user_role"><code class="docutils literal notranslate"><span class="pre">MLILClient.get_user_role()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mlinsightlab.MLILClient.MLILClient.get_variable"><code class="docutils literal notranslate"><span class="pre">MLILClient.get_variable()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mlinsightlab.MLILClient.MLILClient.issue_api_key"><code class="docutils literal notranslate"><span class="pre">MLILClient.issue_api_key()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mlinsightlab.MLILClient.MLILClient.issue_new_password"><code class="docutils literal notranslate"><span class="pre">MLILClient.issue_new_password()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#mlinsightlab.MLILClient.MLILClient.list_data"><code class="docutils literal notranslate"><span class="pre">MLILClient.list_data()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mlinsightlab.MLILClient.MLILClient.list_models"><code class="docutils literal notranslate"><span class="pre">MLILClient.list_models()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mlinsightlab.MLILClient.MLILClient.list_prediction_models"><code class="docutils literal notranslate"><span class="pre">MLILClient.list_prediction_models()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mlinsightlab.MLILClient.MLILClient.list_users"><code class="docutils literal notranslate"><span class="pre">MLILClient.list_users()</span></code></a></li>
@@ -69,7 +67,6 @@
 <li class="toctree-l3"><a class="reference internal" href="#mlinsightlab.MLILClient.MLILClient.set_variable"><code class="docutils literal notranslate"><span class="pre">MLILClient.set_variable()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mlinsightlab.MLILClient.MLILClient.undeploy_model"><code class="docutils literal notranslate"><span class="pre">MLILClient.undeploy_model()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mlinsightlab.MLILClient.MLILClient.update_user_role"><code class="docutils literal notranslate"><span class="pre">MLILClient.update_user_role()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#mlinsightlab.MLILClient.MLILClient.upload_data"><code class="docutils literal notranslate"><span class="pre">MLILClient.upload_data()</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mlinsightlab.MLILClient.MLILClient.verify_password"><code class="docutils literal notranslate"><span class="pre">MLILClient.verify_password()</span></code></a></li>
 </ul>
 </li>
@@ -234,28 +231,6 @@ NOTE: Not validating SSL certificates is discouraged, but necessary in some scen
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="mlinsightlab.MLILClient.MLILClient.download_data">
-<span class="sig-name descname"><span class="pre">download_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">creds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mlinsightlab/MLILClient.html#MLILClient.download_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlinsightlab.MLILClient.MLILClient.download_data" title="Link to this definition"></a></dt>
-<dd><p>Downloads a file from the MLIL data store.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlinsightlab</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLILClient</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span> <span class="o">=</span> <span class="n">MLILClient</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">download_data</span><span class="p">(</span><span class="s1">&#39;test.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;test.txt&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>file_name</strong> (<em>str</em>) – The name of the file in the MLIL datastore you wish to download.</p></li>
-<li><p><strong>output_file_name</strong> (<em>str</em>) – The name of the file to write out to</p></li>
-<li><p><strong>url</strong> (<em>str</em><em> or </em><em>None</em><em> (</em><em>default None</em><em>)</em>) – String containing the URL of your deployment of the platform.</p></li>
-<li><p><strong>creds</strong> (<em>dict</em><em> or </em><em>None</em><em> (</em><em>default None</em><em>)</em>) – Dictionary that must contain keys ‘username’ and ‘key’, and associated values.</p></li>
-<li><p><strong>verbose</strong> (<em>bool</em><em> (</em><em>default False</em><em>)</em>) – Whether to log verbosely</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
 <dt class="sig sig-object py" id="mlinsightlab.MLILClient.MLILClient.get_predictions">
 <span class="sig-name descname"><span class="pre">get_predictions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_flavor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_version_or_alias</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">creds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mlinsightlab/MLILClient.html#MLILClient.get_predictions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlinsightlab.MLILClient.MLILClient.get_predictions" title="Link to this definition"></a></dt>
 <dd><p>Gets predictions from a deployed model</p>
@@ -374,27 +349,6 @@ It must have:
 - At least 1 lowercase character</p></li>
 <li><p><strong>username</strong> (<em>str</em><em> or </em><em>None</em><em> (</em><em>default None</em><em>)</em>) – The user’s display name and login credential</p></li>
 <li><p><strong>overwrite_password</strong> (<em>bool</em><em> (</em><em>default True</em><em>)</em>) – Whether or not to overwrite the password in the config file.</p></li>
-<li><p><strong>url</strong> (<em>str</em><em> or </em><em>None</em><em> (</em><em>default None</em><em>)</em>) – String containing the URL of your deployment of the platform.</p></li>
-<li><p><strong>creds</strong> (<em>dict</em><em> or </em><em>None</em><em> (</em><em>default None</em><em>)</em>) – Dictionary that must contain keys ‘username’ and ‘key’, and associated values.</p></li>
-<li><p><strong>verbose</strong> (<em>bool</em><em> (</em><em>default False</em><em>)</em>) – Whether to log verbosely</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mlinsightlab.MLILClient.MLILClient.list_data">
-<span class="sig-name descname"><span class="pre">list_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">creds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mlinsightlab/MLILClient.html#MLILClient.list_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlinsightlab.MLILClient.MLILClient.list_data" title="Link to this definition"></a></dt>
-<dd><p>Lists all available data in the MLIL variable store</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlinsightlab</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLILClient</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span> <span class="o">=</span> <span class="n">MLILClient</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">list_data</span><span class="p">()</span>
-</pre></div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>directory</strong> (<em>str</em><em> or </em><em>None</em><em> (</em><em>default None</em><em>)</em>) – The directory to list</p></li>
 <li><p><strong>url</strong> (<em>str</em><em> or </em><em>None</em><em> (</em><em>default None</em><em>)</em>) – String containing the URL of your deployment of the platform.</p></li>
 <li><p><strong>creds</strong> (<em>dict</em><em> or </em><em>None</em><em> (</em><em>default None</em><em>)</em>) – Dictionary that must contain keys ‘username’ and ‘key’, and associated values.</p></li>
 <li><p><strong>verbose</strong> (<em>bool</em><em> (</em><em>default False</em><em>)</em>) – Whether to log verbosely</p></li>
@@ -639,30 +593,6 @@ currently exist in MLIL. Defaults to False.</p></li>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>username</strong> (<em>str</em>) – The user’s display name and login credential</p></li>
 <li><p><strong>new_role</strong> (<em>str</em>) – New role to attribute to the specified user</p></li>
-<li><p><strong>url</strong> (<em>str</em><em> or </em><em>None</em><em> (</em><em>default None</em><em>)</em>) – String containing the URL of your deployment of the platform.</p></li>
-<li><p><strong>creds</strong> (<em>dict</em><em> or </em><em>None</em><em> (</em><em>default None</em><em>)</em>) – Dictionary that must contain keys ‘username’ and ‘key’, and associated values.</p></li>
-<li><p><strong>verbose</strong> (<em>bool</em><em> (</em><em>default False</em><em>)</em>) – Whether to log verbosely</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="mlinsightlab.MLILClient.MLILClient.upload_data">
-<span class="sig-name descname"><span class="pre">upload_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">creds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mlinsightlab/MLILClient.html#MLILClient.upload_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#mlinsightlab.MLILClient.MLILClient.upload_data" title="Link to this definition"></a></dt>
-<dd><p>Uploads a file to the MLIL data store.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">mlinsightlab</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLILClient</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span> <span class="o">=</span> <span class="n">MLILClient</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">client</span><span class="o">.</span><span class="n">upload_data</span><span class="p">()</span>
-</pre></div>
-</div>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>file_path</strong> (<em>str</em>) – The path of the file to be uploaded.</p></li>
-<li><p><strong>file_name</strong> (<em>str</em><em> or </em><em>None</em><em> (</em><em>default None</em><em>)</em>) – The name to give your file in the MLIL datastore.</p></li>
-<li><p><strong>overwrite</strong> (<em>bool = False</em>) – Whether or not to delete any files called &lt;filename&gt; that
-currently exist in MLIL. Defaults to False.</p></li>
 <li><p><strong>url</strong> (<em>str</em><em> or </em><em>None</em><em> (</em><em>default None</em><em>)</em>) – String containing the URL of your deployment of the platform.</p></li>
 <li><p><strong>creds</strong> (<em>dict</em><em> or </em><em>None</em><em> (</em><em>default None</em><em>)</em>) – Dictionary that must contain keys ‘username’ and ‘key’, and associated values.</p></li>
 <li><p><strong>verbose</strong> (<em>bool</em><em> (</em><em>default False</em><em>)</em>) – Whether to log verbosely</p></li>
