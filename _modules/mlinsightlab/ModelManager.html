@@ -71,6 +71,7 @@
              
   <h1>Source code for mlinsightlab.ModelManager</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span><span class="w"> </span><span class="nn">docker</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.MLILException</span><span class="w"> </span><span class="kn">import</span> <span class="n">MLILException</span>
@@ -125,7 +126,10 @@
             <span class="n">model_flavor</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
             <span class="n">model_version_or_alias</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
             <span class="n">use_gpu</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-            <span class="n">volumes</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">volumes</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">requirements</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">quantization_kwargs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Deploy a containerized model</span>
@@ -144,6 +148,12 @@
 <span class="sd">            If true, will allow the container access to available GPUs</span>
 <span class="sd">        volumes : dict or None (default None)</span>
 <span class="sd">            If provided, a dictionary of volumes to mount to the container</span>
+<span class="sd">        requirements: str or None (default None)</span>
+<span class="sd">            Additional pip requirements needed to deploy the model</span>
+<span class="sd">        kwargs: dict or None (default None)</span>
+<span class="sd">            Additional keyword arguments needed to deploy the model</span>
+<span class="sd">        quantization_kwargs: dict or None (default None)</span>
+<span class="sd">            Additional quantization keyword arguments needed to deploy the model</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -157,6 +167,13 @@
             <span class="s1">&#39;MODEL_FLAVOR&#39;</span><span class="p">:</span> <span class="n">model_flavor</span><span class="p">,</span>
             <span class="s1">&#39;MLFLOW_TRACKING_URI&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">mlflow_tracking_uri</span>
         <span class="p">}</span>
+        <span class="k">if</span> <span class="n">requirements</span><span class="p">:</span>
+            <span class="n">environment</span><span class="p">[</span><span class="s1">&#39;REQUIREMENTS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">requirements</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">environment</span><span class="p">[</span><span class="s1">&#39;KWARGS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">quantization_kwargs</span><span class="p">:</span>
+            <span class="n">environment</span><span class="p">[</span><span class="s1">&#39;QUANTIZATION_KWARGS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                <span class="n">quantization_kwargs</span><span class="p">)</span>
 
         <span class="c1"># Name for the container</span>
         <span class="n">container_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;mlinsightlab__model__</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s1">__</span><span class="si">{</span><span class="n">model_flavor</span><span class="si">}</span><span class="s1">__</span><span class="si">{</span><span class="n">model_version_or_alias</span><span class="si">}</span><span class="s1">&#39;</span>
