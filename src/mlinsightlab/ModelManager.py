@@ -1,4 +1,5 @@
 import docker
+import json
 import os
 
 from .MLILException import MLILException
@@ -49,7 +50,10 @@ class ModelManager:
             model_flavor: str,
             model_version_or_alias: str,
             use_gpu: bool = False,
-            volumes: dict = None
+            volumes: dict = None,
+            requirements: str = None,
+            kwargs: dict = None,
+            quantization_kwargs: dict = None
     ):
         '''
         Deploy a containerized model
@@ -68,6 +72,12 @@ class ModelManager:
             If true, will allow the container access to available GPUs
         volumes : dict or None (default None)
             If provided, a dictionary of volumes to mount to the container
+        requirements: str or None (default None)
+            Additional pip requirements needed to deploy the model
+        kwargs: dict or None (default None)
+            Additional keyword arguments needed to deploy the model
+        quantization_kwargs: dict or None (default None)
+            Additional quantization keyword arguments needed to deploy the model
 
         Returns
         -------
@@ -81,6 +91,13 @@ class ModelManager:
             'MODEL_FLAVOR': model_flavor,
             'MLFLOW_TRACKING_URI': self.mlflow_tracking_uri
         }
+        if requirements:
+            environment['REQUIREMENTS'] = requirements
+        if kwargs:
+            environment['KWARGS'] = json.dumps(kwargs)
+        if quantization_kwargs:
+            environment['QUANTIZATION_KWARGS'] = json.dumps(
+                quantization_kwargs)
 
         # Name for the container
         container_name = f'mlinsightlab__model__{model_name}__{model_flavor}__{model_version_or_alias}'
