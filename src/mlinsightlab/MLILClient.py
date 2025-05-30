@@ -9,7 +9,7 @@ import os
 from .MLILException import MLILException
 from .user_mgmt import _create_user, _delete_user, _verify_password, _issue_new_password, _get_user_role, _update_user_role, _list_users
 from .key_mgmt import _create_api_key
-from .model_mgmt import _deploy_model, _undeploy_model, _list_models, _predict
+from .model_mgmt import _deploy_model, _undeploy_model, _list_models, _predict, _get_model_logs
 from .platform_mgmt import _reset_platform, _get_platform_resource_usage, _restart_jupyter
 from .data_mgmt import _get_variable, _list_variables, _set_variable, _delete_variable, _get_predictions, _list_prediction_models
 
@@ -910,6 +910,70 @@ class MLILClient:
             else:
                 print(
                     f'Something went wrong, request returned a status code {resp.status_code}')
+
+        # Return the response
+        return resp.json()
+
+    def get_model_logs(
+        self,
+        model_name: str,
+        model_flavor: str,
+        model_version_or_alias: str,
+        url: str = None,
+        creds: dict = None,
+        verbose: bool = False
+    ):
+        '''
+        Get logs for a model.
+
+        >>> from mlinsightlab import MLILClient
+        >>> client = MLILClient()
+        >>> client.get_model_logs('test_model', 'test_model_flavor', 'test_model_version')
+
+        Parameters
+        ----------
+        model_name: str
+            The name of the model to unload.
+        model_flavor: str
+            The flavor of the model. It can be one of:
+                1. 'pyfunc'
+                2. 'sklearn'
+                3. 'transformers'
+                4. 'hfhub'
+        model_version_or_alias: str
+            The version of the model that you wish to unload (from MLFlow).
+        url: str or None (default None)
+            String containing the URL of your deployment of the platform.
+        creds: dict or None (default None)
+            Dictionary that must contain keys 'username' and 'key', and associated values.
+        verbose: bool (default False)
+            Whether to log verbosely
+        '''
+
+        # Get parameters from the client as necessary
+        if url is None:
+            url = self.url
+        if creds is None:
+            creds = self.creds
+
+        # Run the function
+        resp = _get_model_logs(
+            url,
+            creds,
+            model_name=model_name,
+            model_flavor=model_flavor,
+            model_version_or_alias=model_version_or_alias,
+            ssl_verify=self.ssl_verify
+        )
+
+        # Log if verbose
+        if verbose:
+            if resp.status_code == 200:
+                print(f'Logs retrieved!')
+            else:
+                print(
+                    f'Something went wrong, request returned a status code {resp.status_code}'
+                )
 
         # Return the response
         return resp.json()

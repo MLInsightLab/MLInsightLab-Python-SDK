@@ -1,7 +1,7 @@
 # Helper functions to manage and interat with models in the platform
 from .MLILException import MLILException
 from typing import Union, List, Optional
-from .endpoints import DEPLOY_MODEL_ENDPOINT, LIST_MODELS_ENDPOINT, UNDEPLOY_MODEL_ENDPOINT, PREDICT_ENDPOINT
+from .endpoints import DEPLOY_MODEL_ENDPOINT, LIST_MODELS_ENDPOINT, UNDEPLOY_MODEL_ENDPOINT, PREDICT_ENDPOINT, GET_MODEL_LOGS
 import pandas as pd
 import requests
 
@@ -126,7 +126,7 @@ def _undeploy_model(
     ----------
     url: str
         String containing the URL of your deployment of the platform.
-    creds:
+    creds: dict
         Dictionary that must contain keys 'username' and 'key', and associated values.
     model_name: str
         The name of the model to unload.
@@ -230,6 +230,54 @@ def _predict(
             url,
             auth=(creds['username'], creds['key']),
             json=json_data,
+            verify=ssl_verify
+        )
+
+    # If the request is not successful, raise exception, else return response
+    if not resp.ok:
+        raise MLILException(str(resp.json()))
+    return resp
+
+
+def _get_model_logs(
+    url: str,
+    creds: dict,
+    model_name: str,
+    model_flavor: str,
+    model_version_or_alias: str,
+    ssl_verify: bool = True
+):
+    '''
+    NOT MEANT TO BE CALLED BY THE END USER
+
+    Gets model logs.
+    Called within the MLILClient class.
+
+    Parameters
+    ----------
+    url: str
+        String containing the URL of your deployment to the platform.
+    creds: dict
+        Dictionary that must contain keys 'username' and 'key', and associated values.
+    model_name: str
+        The name of the model to unload.
+    model_flavor: str
+        The flavor of the model, e.g. 'transformers', 'pyfunc', etc.
+    model_version_or_alias: str
+        The version of the model that you wish to unload (from MLFlow).
+    ssl_verify: bool (default True)
+        Whether to verify SSL certificates in the request
+    '''
+
+    # Format the URL
+    url = f'''{
+        url}/{GET_MODEL_LOGS}/{model_name}/{model_flavor}/{model_version_or_alias}'''
+
+    # Make the request to the platform
+    with requests.Session() as sess:
+        resp = sess.get(
+            url,
+            auth=(creds['username'], creds['key']),
             verify=ssl_verify
         )
 
