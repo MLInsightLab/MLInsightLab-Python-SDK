@@ -1,6 +1,8 @@
 from typing import Union, List, Optional, Any
 from pathlib import Path
 import getpass
+import ollama
+import httpx
 import json
 import os
 
@@ -12,6 +14,7 @@ from .key_mgmt import _create_api_key
 from .model_mgmt import _deploy_model, _undeploy_model, _list_models, _predict, _get_model_logs
 from .platform_mgmt import _reset_platform, _get_platform_resource_usage, _restart_jupyter
 from .data_mgmt import _get_variable, _list_variables, _set_variable, _delete_variable, _get_predictions, _list_prediction_models
+from .endpoints import OLLAMA
 
 
 class MLILClient:
@@ -88,6 +91,15 @@ class MLILClient:
                 os.environ['MLFLOW_TRACKING_USERNAME'] = self.username
             if not os.getenv('MLFLOW_TRACKING_PASSWORD'):
                 os.environ['MLFLOW_TRACKING_PASSWORD'] = self.password
+
+        # Create ollama client
+        self.ollama = ollama.Client(
+            host=f'{self.url}/{OLLAMA}',
+            auth=httpx.BasicAuth(
+                username=self.username,
+                password=self.api_key
+            )
+        )
 
     '''
     ###########################################################################
