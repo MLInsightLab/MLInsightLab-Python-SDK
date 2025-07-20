@@ -73,6 +73,8 @@
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">getpass</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">ollama</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">httpx</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 
@@ -84,6 +86,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.model_mgmt</span><span class="w"> </span><span class="kn">import</span> <span class="n">_deploy_model</span><span class="p">,</span> <span class="n">_undeploy_model</span><span class="p">,</span> <span class="n">_list_models</span><span class="p">,</span> <span class="n">_predict</span><span class="p">,</span> <span class="n">_get_model_logs</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.platform_mgmt</span><span class="w"> </span><span class="kn">import</span> <span class="n">_reset_platform</span><span class="p">,</span> <span class="n">_get_platform_resource_usage</span><span class="p">,</span> <span class="n">_restart_jupyter</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.data_mgmt</span><span class="w"> </span><span class="kn">import</span> <span class="n">_get_variable</span><span class="p">,</span> <span class="n">_list_variables</span><span class="p">,</span> <span class="n">_set_variable</span><span class="p">,</span> <span class="n">_delete_variable</span><span class="p">,</span> <span class="n">_get_predictions</span><span class="p">,</span> <span class="n">_list_prediction_models</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.endpoints</span><span class="w"> </span><span class="kn">import</span> <span class="n">OLLAMA</span>
 
 
 <div class="viewcode-block" id="MLILClient">
@@ -162,6 +165,15 @@
                 <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;MLFLOW_TRACKING_USERNAME&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">username</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;MLFLOW_TRACKING_PASSWORD&#39;</span><span class="p">):</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;MLFLOW_TRACKING_PASSWORD&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">password</span>
+
+        <span class="c1"># Create ollama client</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ollama</span> <span class="o">=</span> <span class="n">ollama</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span>
+            <span class="n">host</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">url</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">OLLAMA</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
+            <span class="n">auth</span><span class="o">=</span><span class="n">httpx</span><span class="o">.</span><span class="n">BasicAuth</span><span class="p">(</span>
+                <span class="n">username</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">,</span>
+                <span class="n">password</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">api_key</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
 
 <span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    ###########################################################################</span>
