@@ -3,6 +3,7 @@ from pathlib import Path
 import getpass
 import ollama
 import httpx
+import boto3
 import json
 import os
 
@@ -99,6 +100,21 @@ class MLILClient:
                 username=self.username,
                 password=self.api_key
             )
+        )
+
+        # Create s3 client
+        s3_endpoint_url = os.getenv('S3_ENDPOINT_URL')
+
+        if s3_endpoint_url is None:
+            protocol = self.url.split('://')[0]
+            host = self.url.split('://')[-1].replace('/api', '')
+            s3_endpoint_url = f'{protocol}://s3.{host}'
+
+        self.s3 = boto3.client(
+            's3',
+            endpoint_url=s3_endpoint_url,
+            aws_access_key_id=self.username,
+            aws_secret_access_key=self.password
         )
 
     '''

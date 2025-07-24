@@ -5,3 +5,4 @@ pandas
 sphinx
 docker
 ollama
+boto3
