@@ -99,7 +99,8 @@ class MLILClient:
             auth=httpx.BasicAuth(
                 username=self.username,
                 password=self.api_key
-            )
+            ),
+            verify=self.ssl_verify
         )
 
         # Create s3 client
@@ -114,7 +115,8 @@ class MLILClient:
             's3',
             endpoint_url=s3_endpoint_url,
             aws_access_key_id=self.username,
-            aws_secret_access_key=self.password
+            aws_secret_access_key=self.password,
+            verify=self.ssl_verify
         )
 
     '''
