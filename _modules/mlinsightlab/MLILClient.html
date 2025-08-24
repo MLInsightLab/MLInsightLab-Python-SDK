@@ -978,7 +978,7 @@
         <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">model_flavor</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">model_version_or_alias</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">data</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+        <span class="n">inputs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
         <span class="n">predict_function</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;predict&#39;</span><span class="p">,</span>
         <span class="n">dtype</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">params</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1006,8 +1006,8 @@
 <span class="sd">                4. &#39;hfhub&#39;</span>
 <span class="sd">        model_version_or_alias: str</span>
 <span class="sd">            The version of the model that you wish to invoke.</span>
-<span class="sd">        data: Union[str, List[str]]</span>
-<span class="sd">            The input data for prediction. Can be a single string or a list of strings.</span>
+<span class="sd">        inputs: Union[str, List[str]]</span>
+<span class="sd">            The input input data for prediction. Can be a single string or a list of strings.</span>
 <span class="sd">        predict_function: str (default &#39;predict&#39;)</span>
 <span class="sd">            The name of the prediction function to call.</span>
 <span class="sd">        dtype: str or None (default None)</span>
@@ -1037,7 +1037,7 @@
             <span class="n">model_name</span><span class="o">=</span><span class="n">model_name</span><span class="p">,</span>
             <span class="n">model_flavor</span><span class="o">=</span><span class="n">model_flavor</span><span class="p">,</span>
             <span class="n">model_version_or_alias</span><span class="o">=</span><span class="n">model_version_or_alias</span><span class="p">,</span>
-            <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+            <span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span>
             <span class="n">predict_function</span><span class="o">=</span><span class="n">predict_function</span><span class="p">,</span>
             <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span>
             <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">,</span>
