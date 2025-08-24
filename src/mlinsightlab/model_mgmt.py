@@ -162,7 +162,7 @@ def _predict(
     model_name: str,
     model_flavor: str,
     model_version_or_alias: str,
-    data: Union[list, int, float, str],
+    inputs: Union[list, int, float, str],
     convert_to_numpy: bool = True,
     predict_function: str = 'predict',
     dtype: str = None,
@@ -188,7 +188,7 @@ def _predict(
         The flavor of the model, e.g. 'transformers', 'pyfunc', etc.
     model_version_or_alias: str
         The version of the model that you wish to invoke (from MLFlow).
-    data: varied types
+    inputs: varied types
         The input data for prediction. Can be a single value or list of values
     convert_to_numpy: bool = True
         Whether or not to convert inputs to a NumPy array.
@@ -203,15 +203,15 @@ def _predict(
     '''
 
     # Format the data so that it is a list
-    if isinstance(data, str):
-        data = [data]
+    if isinstance(inputs, str):
+        data = [inputs]
 
     # Format the JSON payload
     json_data = {
         'model_name': model_name,
         'model_flavor': model_flavor,
         'model_version_or_alias': model_version_or_alias,
-        'data': data,
+        'inputs': inputs,
         'predict_function': predict_function,
         'params': params if params else {},
         'convert_to_numpy': convert_to_numpy

@@ -866,7 +866,7 @@ class MLILClient:
         model_name: str,
         model_flavor: str,
         model_version_or_alias: str,
-        data: Union[str, List[str]],
+        inputs: Union[str, List[str]],
         predict_function: str = 'predict',
         dtype: str = None,
         params: Optional[dict] = None,
@@ -894,8 +894,8 @@ class MLILClient:
                 4. 'hfhub'
         model_version_or_alias: str
             The version of the model that you wish to invoke.
-        data: Union[str, List[str]]
-            The input data for prediction. Can be a single string or a list of strings.
+        inputs: Union[str, List[str]]
+            The input input data for prediction. Can be a single string or a list of strings.
         predict_function: str (default 'predict')
             The name of the prediction function to call.
         dtype: str or None (default None)
@@ -925,7 +925,7 @@ class MLILClient:
             model_name=model_name,
             model_flavor=model_flavor,
             model_version_or_alias=model_version_or_alias,
-            data=data,
+            inputs=inputs,
             predict_function=predict_function,
             dtype=dtype,
             params=params,
