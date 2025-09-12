@@ -146,7 +146,7 @@ class ModelManager:
                         docker.types.DeviceRequest(
                             count=-1, capabilities=[['gpu']])
                     ],
-                    volumes = volumes
+                    volumes=volumes
                 )
             else:
                 model_container = self.docker_client.services.create(
@@ -157,19 +157,17 @@ class ModelManager:
                     volumes=volumes
                 )
 
-            # Append the container properties to the models list
-            self.models.append(
-                {
-                    'model_name': model_name,
-                    'model_flavor': model_flavor,
-                    'model_version_or_alias': model_version_or_alias,
-                    'container_name': model_container.name
-                }
-            )
+        # Append the container properties to the models list
+        self.models.append(
+            {
+                'model_name': model_name,
+                'model_flavor': model_flavor,
+                'model_version_or_alias': model_version_or_alias,
+                'container_name': model_container.name
+            }
+        )
 
-            return True
-
-
+        return True
 
     def remove_deployed_model(
             self,
