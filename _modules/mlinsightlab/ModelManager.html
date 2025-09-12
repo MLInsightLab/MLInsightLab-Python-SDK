@@ -88,8 +88,9 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">model_image</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;ghcr.io/mlinsightlab/mlinsightlab-model-container:latest&#39;</span><span class="p">,</span>
         <span class="n">model_network</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;mlinsightlab_model_network&#39;</span><span class="p">,</span>
-        <span class="n">mlflow_tracking_uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;http://mlflow:2244&#39;</span><span class="p">,</span>
-        <span class="n">model_port</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;8888&#39;</span>
+        <span class="n">mlflow_tracking_uri</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;http://mlflow:5000&#39;</span><span class="p">,</span>
+        <span class="n">model_port</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;8888&#39;</span><span class="p">,</span>
+        <span class="n">deploy_mode</span><span class="o">=</span><span class="s1">&#39;compose&#39;</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">        Parameters</span>
@@ -98,10 +99,12 @@
 <span class="sd">            The image of the container to use</span>
 <span class="sd">        model_network : str (default &#39;mlinsightlab_model_network&#39;)</span>
 <span class="sd">            The network to deploy the models to</span>
-<span class="sd">        mlflow_tracking_uri : str (default &#39;http://mlflow:2244&#39;)</span>
+<span class="sd">        mlflow_tracking_uri : str (default &#39;http://mlflow:5000&#39;)</span>
 <span class="sd">            The tracking URI for the MLflow service on the docker network</span>
 <span class="sd">        model_port : str (default &#39;8888&#39;)</span>
 <span class="sd">            The port to deploy the model to on the container</span>
+<span class="sd">        deply_mode : str (default &#39;compose&#39;)</span>
+<span class="sd">            The deployment mode to run in. One of either &#39;compose&#39; or &#39;swarm&#39;</span>
 <span class="sd">        &#39;&#39;&#39;</span>
 
         <span class="c1"># Create docker container client</span>
@@ -113,6 +116,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">mlflow_tracking_uri</span> <span class="o">=</span> <span class="n">mlflow_tracking_uri</span> <span class="k">if</span> <span class="n">mlflow_tracking_uri</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span>
             <span class="s1">&#39;MLFLOW_TRACKING_URI&#39;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">container_port</span> <span class="o">=</span> <span class="n">model_port</span> <span class="k">if</span> <span class="n">model_port</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;MODEL_PORT&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deploy_mode</span> <span class="o">=</span> <span class="n">deploy_mode</span> <span class="k">if</span> <span class="n">deploy_mode</span> <span class="k">else</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;DEPLOY_MODE&#39;</span><span class="p">]</span>
 
         <span class="c1"># Store the containers</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="p">[]</span>
@@ -178,43 +182,70 @@
         <span class="c1"># Name for the container</span>
         <span class="n">container_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;mlinsightlab__model__</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s1">__</span><span class="si">{</span><span class="n">model_flavor</span><span class="si">}</span><span class="s1">__</span><span class="si">{</span><span class="n">model_version_or_alias</span><span class="si">}</span><span class="s1">&#39;</span>
 
-        <span class="c1"># Run the container, giving it access to the GPU if requested</span>
-        <span class="k">if</span> <span class="n">use_gpu</span><span class="p">:</span>
-            <span class="n">model_container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">docker_client</span><span class="o">.</span><span class="n">containers</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">model_image</span><span class="p">,</span>
-                <span class="n">auto_remove</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">environment</span><span class="o">=</span><span class="n">environment</span><span class="p">,</span>
-                <span class="n">network</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_network</span><span class="p">,</span>
-                <span class="n">name</span><span class="o">=</span><span class="n">container_name</span><span class="p">,</span>
-                <span class="n">detach</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">device_requests</span><span class="o">=</span><span class="p">[</span>
-                    <span class="n">docker</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">DeviceRequest</span><span class="p">(</span>
-                        <span class="n">count</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">capabilities</span><span class="o">=</span><span class="p">[[</span><span class="s1">&#39;gpu&#39;</span><span class="p">]])</span>
-                <span class="p">],</span>
-                <span class="n">volumes</span><span class="o">=</span><span class="n">volumes</span>
-            <span class="p">)</span>
+        <span class="c1"># Run via docker if deploy_mode is via compose</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">deploy_mode</span> <span class="o">==</span> <span class="s1">&#39;compose&#39;</span><span class="p">:</span>
+
+            <span class="c1"># Run the container, giving it access to the GPU if requested</span>
+            <span class="k">if</span> <span class="n">use_gpu</span><span class="p">:</span>
+                <span class="n">model_container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">docker_client</span><span class="o">.</span><span class="n">containers</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">model_image</span><span class="p">,</span>
+                    <span class="n">auto_remove</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">environment</span><span class="o">=</span><span class="n">environment</span><span class="p">,</span>
+                    <span class="n">network</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_network</span><span class="p">,</span>
+                    <span class="n">name</span><span class="o">=</span><span class="n">container_name</span><span class="p">,</span>
+                    <span class="n">detach</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">device_requests</span><span class="o">=</span><span class="p">[</span>
+                        <span class="n">docker</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">DeviceRequest</span><span class="p">(</span>
+                            <span class="n">count</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">capabilities</span><span class="o">=</span><span class="p">[[</span><span class="s1">&#39;gpu&#39;</span><span class="p">]])</span>
+                    <span class="p">],</span>
+                    <span class="n">volumes</span><span class="o">=</span><span class="n">volumes</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">model_container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">docker_client</span><span class="o">.</span><span class="n">containers</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">model_image</span><span class="p">,</span>
+                    <span class="n">auto_remove</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">environment</span><span class="o">=</span><span class="n">environment</span><span class="p">,</span>
+                    <span class="n">network</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_network</span><span class="p">,</span>
+                    <span class="n">name</span><span class="o">=</span><span class="n">container_name</span><span class="p">,</span>
+                    <span class="n">detach</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">volumes</span><span class="o">=</span><span class="n">volumes</span>
+                <span class="p">)</span>
+
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">model_container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">docker_client</span><span class="o">.</span><span class="n">containers</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">model_image</span><span class="p">,</span>
-                <span class="n">auto_remove</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">environment</span><span class="o">=</span><span class="n">environment</span><span class="p">,</span>
-                <span class="n">network</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_network</span><span class="p">,</span>
-                <span class="n">name</span><span class="o">=</span><span class="n">container_name</span><span class="p">,</span>
-                <span class="n">detach</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">volumes</span><span class="o">=</span><span class="n">volumes</span>
+            <span class="k">if</span> <span class="n">use_gpu</span><span class="p">:</span>
+                <span class="n">model_container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">docker_client</span><span class="o">.</span><span class="n">services</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">model_image</span><span class="p">,</span>
+                    <span class="n">environment</span><span class="o">=</span><span class="n">environment</span><span class="p">,</span>
+                    <span class="n">network</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_network</span><span class="p">,</span>
+                    <span class="n">name</span><span class="o">=</span><span class="n">container_name</span><span class="p">,</span>
+                    <span class="n">device_requests</span><span class="o">=</span><span class="p">[</span>
+                        <span class="n">docker</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">DeviceRequest</span><span class="p">(</span>
+                            <span class="n">count</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">capabilities</span><span class="o">=</span><span class="p">[[</span><span class="s1">&#39;gpu&#39;</span><span class="p">]])</span>
+                    <span class="p">],</span>
+                    <span class="n">volumes</span> <span class="o">=</span> <span class="n">volumes</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">model_container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">docker_client</span><span class="o">.</span><span class="n">services</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">model_image</span><span class="p">,</span>
+                    <span class="n">environment</span><span class="o">=</span><span class="n">environment</span><span class="p">,</span>
+                    <span class="n">network</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_network</span><span class="p">,</span>
+                    <span class="n">name</span><span class="o">=</span><span class="n">container_name</span><span class="p">,</span>
+                    <span class="n">volumes</span><span class="o">=</span><span class="n">volumes</span>
+                <span class="p">)</span>
+
+            <span class="c1"># Append the container properties to the models list</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span>
+                    <span class="s1">&#39;model_name&#39;</span><span class="p">:</span> <span class="n">model_name</span><span class="p">,</span>
+                    <span class="s1">&#39;model_flavor&#39;</span><span class="p">:</span> <span class="n">model_flavor</span><span class="p">,</span>
+                    <span class="s1">&#39;model_version_or_alias&#39;</span><span class="p">:</span> <span class="n">model_version_or_alias</span><span class="p">,</span>
+                    <span class="s1">&#39;container_name&#39;</span><span class="p">:</span> <span class="n">model_container</span><span class="o">.</span><span class="n">name</span>
+                <span class="p">}</span>
             <span class="p">)</span>
 
-        <span class="c1"># Append the container properties to the models list</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="p">{</span>
-                <span class="s1">&#39;model_name&#39;</span><span class="p">:</span> <span class="n">model_name</span><span class="p">,</span>
-                <span class="s1">&#39;model_flavor&#39;</span><span class="p">:</span> <span class="n">model_flavor</span><span class="p">,</span>
-                <span class="s1">&#39;model_version_or_alias&#39;</span><span class="p">:</span> <span class="n">model_version_or_alias</span><span class="p">,</span>
-                <span class="s1">&#39;container_name&#39;</span><span class="p">:</span> <span class="n">model_container</span><span class="o">.</span><span class="n">name</span>
-            <span class="p">}</span>
-        <span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span></div>
 
-        <span class="k">return</span> <span class="kc">True</span></div>
+
 
 
 <div class="viewcode-block" id="ModelManager.remove_deployed_model">
@@ -255,14 +286,23 @@
             <span class="k">raise</span> <span class="n">MLILException</span><span class="p">(</span><span class="s1">&#39;Container for that model not found&#39;</span><span class="p">)</span>
 
         <span class="c1"># Get the container, raise exception if not found</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">docker_client</span><span class="o">.</span><span class="n">containers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">container_name</span><span class="p">)</span>
-        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">MLILException</span><span class="p">(</span><span class="s1">&#39;Container for that model not found&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">deploy_mode</span> <span class="o">==</span> <span class="s1">&#39;compose&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">docker_client</span><span class="o">.</span><span class="n">containers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">container_name</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">MLILException</span><span class="p">(</span><span class="s1">&#39;Container for that model not found&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">docker_client</span><span class="o">.</span><span class="n">services</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">container_name</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">MLILException</span><span class="p">(</span><span class="s1">&#39;Container for that model not found&#39;</span><span class="p">)</span>
 
         <span class="c1"># Try to stop the container, raise exception if unable to</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">container</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">deploy_mode</span> <span class="o">==</span> <span class="s1">&#39;compose&#39;</span><span class="p">:</span>
+                <span class="n">container</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">container</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="p">[</span>
                 <span class="n">model</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="k">if</span> <span class="n">model</span><span class="p">[</span><span class="s1">&#39;container_name&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="n">container_name</span>
             <span class="p">]</span>
