@@ -151,10 +151,9 @@ class ModelManager:
             else:
                 model_container = self.docker_client.services.create(
                     self.model_image,
-                    environment=environment,
-                    network=self.model_network,
+                    env=environment,
+                    networks=[self.model_network],
                     name=container_name,
-                    volumes=volumes
                 )
 
         # Append the container properties to the models list
