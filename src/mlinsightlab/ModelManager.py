@@ -14,8 +14,9 @@ class ModelManager:
         self,
         model_image: str = 'ghcr.io/mlinsightlab/mlinsightlab-model-container:latest',
         model_network: str = 'mlinsightlab_model_network',
-        mlflow_tracking_uri: str = 'http://mlflow:2244',
-        model_port: str = '8888'
+        mlflow_tracking_uri: str = 'http://mlflow:5000',
+        model_port: str = '8888',
+        deploy_mode='compose'
     ):
         '''
         Parameters
@@ -24,10 +25,12 @@ class ModelManager:
             The image of the container to use
         model_network : str (default 'mlinsightlab_model_network')
             The network to deploy the models to
-        mlflow_tracking_uri : str (default 'http://mlflow:2244')
+        mlflow_tracking_uri : str (default 'http://mlflow:5000')
             The tracking URI for the MLflow service on the docker network
         model_port : str (default '8888')
             The port to deploy the model to on the container
+        deply_mode : str (default 'compose')
+            The deployment mode to run in. One of either 'compose' or 'swarm'
         '''
 
         # Create docker container client
@@ -39,6 +42,7 @@ class ModelManager:
         self.mlflow_tracking_uri = mlflow_tracking_uri if mlflow_tracking_uri else os.environ[
             'MLFLOW_TRACKING_URI']
         self.container_port = model_port if model_port else os.environ['MODEL_PORT']
+        self.deploy_mode = deploy_mode if deploy_mode else os.environ['DEPLOY_MODE']
 
         # Store the containers
         self.models = []
@@ -102,43 +106,70 @@ class ModelManager:
         # Name for the container
         container_name = f'mlinsightlab__model__{model_name}__{model_flavor}__{model_version_or_alias}'
 
-        # Run the container, giving it access to the GPU if requested
-        if use_gpu:
-            model_container = self.docker_client.containers.run(
-                self.model_image,
-                auto_remove=True,
-                environment=environment,
-                network=self.model_network,
-                name=container_name,
-                detach=True,
-                device_requests=[
-                    docker.types.DeviceRequest(
-                        count=-1, capabilities=[['gpu']])
-                ],
-                volumes=volumes
-            )
+        # Run via docker if deploy_mode is via compose
+        if self.deploy_mode == 'compose':
+
+            # Run the container, giving it access to the GPU if requested
+            if use_gpu:
+                model_container = self.docker_client.containers.run(
+                    self.model_image,
+                    auto_remove=True,
+                    environment=environment,
+                    network=self.model_network,
+                    name=container_name,
+                    detach=True,
+                    device_requests=[
+                        docker.types.DeviceRequest(
+                            count=-1, capabilities=[['gpu']])
+                    ],
+                    volumes=volumes
+                )
+            else:
+                model_container = self.docker_client.containers.run(
+                    self.model_image,
+                    auto_remove=True,
+                    environment=environment,
+                    network=self.model_network,
+                    name=container_name,
+                    detach=True,
+                    volumes=volumes
+                )
+
         else:
-            model_container = self.docker_client.containers.run(
-                self.model_image,
-                auto_remove=True,
-                environment=environment,
-                network=self.model_network,
-                name=container_name,
-                detach=True,
-                volumes=volumes
+            if use_gpu:
+                model_container = self.docker_client.services.create(
+                    self.model_image,
+                    environment=environment,
+                    network=self.model_network,
+                    name=container_name,
+                    device_requests=[
+                        docker.types.DeviceRequest(
+                            count=-1, capabilities=[['gpu']])
+                    ],
+                    volumes = volumes
+                )
+            else:
+                model_container = self.docker_client.services.create(
+                    self.model_image,
+                    environment=environment,
+                    network=self.model_network,
+                    name=container_name,
+                    volumes=volumes
+                )
+
+            # Append the container properties to the models list
+            self.models.append(
+                {
+                    'model_name': model_name,
+                    'model_flavor': model_flavor,
+                    'model_version_or_alias': model_version_or_alias,
+                    'container_name': model_container.name
+                }
             )
 
-        # Append the container properties to the models list
-        self.models.append(
-            {
-                'model_name': model_name,
-                'model_flavor': model_flavor,
-                'model_version_or_alias': model_version_or_alias,
-                'container_name': model_container.name
-            }
-        )
+            return True
 
-        return True
+
 
     def remove_deployed_model(
             self,
@@ -176,14 +207,23 @@ class ModelManager:
             raise MLILException('Container for that model not found')
 
         # Get the container, raise exception if not found
-        try:
-            container = self.docker_client.containers.get(container_name)
-        except Exception:
-            raise MLILException('Container for that model not found')
+        if self.deploy_mode == 'compose':
+            try:
+                container = self.docker_client.containers.get(container_name)
+            except Exception:
+                raise MLILException('Container for that model not found')
+        else:
+            try:
+                container = self.docker_client.services.get(container_name)
+            except Exception:
+                raise MLILException('Container for that model not found')
 
         # Try to stop the container, raise exception if unable to
         try:
-            container.stop()
+            if self.deploy_mode == 'compose':
+                container.stop()
+            else:
+                container.remove()
             self.models = [
                 model for model in self.models if model['container_name'] != container_name
             ]
