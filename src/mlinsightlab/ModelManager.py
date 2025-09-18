@@ -281,7 +281,15 @@ class ModelManager:
             raise MLILException('Container for that model not found')
 
         # Return status
-        return self.docker_client.containers.get(container_name).status
+        if self.deploy_mode == 'compose':
+            return self.docker_client.containers.get(container_name).status
+        else:
+            tasks = self.docker_client.services.get(container_name).tasks()
+            tasks_states = [
+                task['Status']['State'] for task in tasks
+            ]
+            unique_states = list(set(task_states))
+            return ', '.join(unique_states)
 
     def get_model_logs(
             self,
@@ -319,4 +327,11 @@ class ModelManager:
             raise MLILException('Container for that model not found')
 
         # Return logs
-        return self.docker_client.containers.get(container_name).logs().decode('utf-8')
+        if self.deploy_mode == 'compose':
+            return self.docker_client.containers.get(container_name).logs().decode('utf-8')
+        else:
+            logs = self.docker_client.services.get(
+                container_name).logs(stdout=True)
+            return ''.join(
+                [log.decode('utf-8') for log in logs]
+            )
