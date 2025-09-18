@@ -366,7 +366,15 @@
             <span class="k">raise</span> <span class="n">MLILException</span><span class="p">(</span><span class="s1">&#39;Container for that model not found&#39;</span><span class="p">)</span>
 
         <span class="c1"># Return status</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">docker_client</span><span class="o">.</span><span class="n">containers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">container_name</span><span class="p">)</span><span class="o">.</span><span class="n">status</span></div>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">deploy_mode</span> <span class="o">==</span> <span class="s1">&#39;compose&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">docker_client</span><span class="o">.</span><span class="n">containers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">container_name</span><span class="p">)</span><span class="o">.</span><span class="n">status</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tasks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">docker_client</span><span class="o">.</span><span class="n">services</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">container_name</span><span class="p">)</span><span class="o">.</span><span class="n">tasks</span><span class="p">()</span>
+            <span class="n">tasks_states</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">task</span><span class="p">[</span><span class="s1">&#39;Status&#39;</span><span class="p">][</span><span class="s1">&#39;State&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">tasks</span>
+            <span class="p">]</span>
+            <span class="n">unique_states</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">task_states</span><span class="p">))</span>
+            <span class="k">return</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">unique_states</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ModelManager.get_model_logs">
@@ -407,7 +415,14 @@
             <span class="k">raise</span> <span class="n">MLILException</span><span class="p">(</span><span class="s1">&#39;Container for that model not found&#39;</span><span class="p">)</span>
 
         <span class="c1"># Return logs</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">docker_client</span><span class="o">.</span><span class="n">containers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">container_name</span><span class="p">)</span><span class="o">.</span><span class="n">logs</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">deploy_mode</span> <span class="o">==</span> <span class="s1">&#39;compose&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">docker_client</span><span class="o">.</span><span class="n">containers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">container_name</span><span class="p">)</span><span class="o">.</span><span class="n">logs</span><span class="p">()</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">docker_client</span><span class="o">.</span><span class="n">services</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                <span class="n">container_name</span><span class="p">)</span><span class="o">.</span><span class="n">logs</span><span class="p">(</span><span class="n">stdout</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">log</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">log</span> <span class="ow">in</span> <span class="n">logs</span><span class="p">]</span>
+            <span class="p">)</span></div>
 </div>
 
 </pre></div>
