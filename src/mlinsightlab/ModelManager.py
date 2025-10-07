@@ -95,6 +95,8 @@ class ModelManager:
             'MODEL_FLAVOR': model_flavor,
             'MLFLOW_TRACKING_URI': self.mlflow_tracking_uri
         }
+        if os.getenv('OLLAMA_HOST'):
+            environment['OLLAMA_HOST'] = os.environ['OLLAMA_HOST']
         if requirements:
             environment['REQUIREMENTS'] = requirements
         if kwargs:
