@@ -171,6 +171,8 @@
             <span class="s1">&#39;MODEL_FLAVOR&#39;</span><span class="p">:</span> <span class="n">model_flavor</span><span class="p">,</span>
             <span class="s1">&#39;MLFLOW_TRACKING_URI&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">mlflow_tracking_uri</span>
         <span class="p">}</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;OLLAMA_HOST&#39;</span><span class="p">):</span>
+            <span class="n">environment</span><span class="p">[</span><span class="s1">&#39;OLLAMA_HOST&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;OLLAMA_HOST&#39;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">requirements</span><span class="p">:</span>
             <span class="n">environment</span><span class="p">[</span><span class="s1">&#39;REQUIREMENTS&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">requirements</span>
         <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span>
