@@ -202,9 +202,10 @@ def _predict(
         Whether to verify SSL certificates in the request
     '''
 
+    # TODO: Remove this block once working
     # Format the data so that it is a list
-    if isinstance(inputs, str):
-        data = [inputs]
+    # if isinstance(inputs, str):
+    # data = [inputs]
 
     # Format the JSON payload
     json_data = {
