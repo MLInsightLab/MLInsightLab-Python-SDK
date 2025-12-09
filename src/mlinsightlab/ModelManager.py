@@ -52,7 +52,7 @@ class ModelManager:
             model_uri: str,
             model_name: str,
             model_flavor: str,
-            model_version_or_alias: str,
+            model_version_or_alias: str | int,
             use_gpu: bool = False,
             volumes: dict = None,
             requirements: str = None,
@@ -70,7 +70,7 @@ class ModelManager:
             The name of the model
         model_flavor : str
             The flavor of the model
-        model_version_or_alias : str
+        model_version_or_alias : str | int
             The version or alias of the model
         use_gpu : bool (default False)
             If true, will allow the container access to available GPUs
@@ -163,7 +163,7 @@ class ModelManager:
             {
                 'model_name': model_name,
                 'model_flavor': model_flavor,
-                'model_version_or_alias': model_version_or_alias,
+                'model_version_or_alias': str(model_version_or_alias),
                 'container_name': model_container.name
             }
         )
@@ -174,7 +174,7 @@ class ModelManager:
             self,
             model_name: str,
             model_flavor: str,
-            model_version_or_alias: str,
+            model_version_or_alias: str | int,
     ):
         '''
         Remove a deployed model
@@ -185,7 +185,7 @@ class ModelManager:
             The name of the model
         model_flavor : str
             The flavor of the model
-        model_version_or_alias : str
+        model_version_or_alias : str | int
             The version or alias of the model
 
         Returns
@@ -197,7 +197,7 @@ class ModelManager:
         # Search for the container name
         container_name = None
         for model in self.models:
-            if model['model_name'] == model_name and model['model_flavor'] == model_flavor and model['model_version_or_alias'] == model_version_or_alias:
+            if model['model_name'] == model_name and model['model_flavor'] == model_flavor and str(model['model_version_or_alias']) == str(model_version_or_alias):
                 container_name = model['container_name']
                 break
 
@@ -251,7 +251,7 @@ class ModelManager:
             self,
             model_name: str,
             model_flavor: str,
-            model_version_or_alias: str
+            model_version_or_alias: str | int
     ):
         '''
         Get the status of a deployed model
@@ -262,7 +262,7 @@ class ModelManager:
             The name of the model
         model_flavor : str
             The flavor of the model
-        model_version_or_alias : str
+        model_version_or_alias : str | int
             The version or alias of the model
 
         Returns
@@ -274,7 +274,7 @@ class ModelManager:
         # Search for the container name
         container_name = None
         for model in self.models:
-            if model['model_name'] == model_name and model['model_flavor'] == model_flavor and model['model_version_or_alias'] == model_version_or_alias:
+            if model['model_name'] == model_name and model['model_flavor'] == model_flavor and str(model['model_version_or_alias']) == str(model_version_or_alias):
                 container_name = model['container_name']
                 break
 
@@ -297,7 +297,7 @@ class ModelManager:
             self,
             model_name: str,
             model_flavor: str,
-            model_version_or_alias: str
+            model_version_or_alias: str | int
     ):
         '''
         Get the logs of a deployed model
@@ -308,7 +308,7 @@ class ModelManager:
             The name of the model
         model_flavor : str
             The flavor of the model
-        model_version_or_alias : str
+        model_version_or_alias : str | int
             The version or alias of the model
 
         Returns
@@ -320,7 +320,7 @@ class ModelManager:
         # Search for the container name
         container_name = None
         for model in self.models:
-            if model['model_name'] == model_name and model['model_flavor'] == model_flavor and model['model_version_or_alias'] == model_version_or_alias:
+            if model['model_name'] == model_name and model['model_flavor'] == model_flavor and str(model['model_version_or_alias']) == str(model_version_or_alias):
                 container_name = model['container_name']
                 break
 
